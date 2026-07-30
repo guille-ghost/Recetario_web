@@ -1,4 +1,4 @@
-# Fuego Real · Portal Gastronómico Parrillero
+# Mephisto's Grill · Portal Gastronómico Parrillero
 
 Portal gastronómico 100% estático (HTML5 + Tailwind CSS vía CDN + JavaScript Vanilla ES6+), sin frameworks ni backend. Todo el contenido editable se guarda en `localStorage` del navegador a través de un panel de administración visual.
 
