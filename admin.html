@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · Panel de Contenido | Portal Gastronómico</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          charcoal: "#1F1B18",
+          smoke: "#3A322C",
+          ember: "#C1440E",
+          gold: "#C89B3C",
+          parchment: "#EDE4D3",
+          ash: "#8B8378"
+        },
+        fontFamily: {
+          display: ["Fraunces", "serif"],
+          body: ["Inter", "sans-serif"]
+        }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="css/custom.css" />
+</head>
+<body class="bg-parchment text-charcoal font-body">
+
+<header class="bg-charcoal text-parchment sticky top-0 z-50 border-b-4 border-ember">
+  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="font-display text-2xl tracking-tight">Fuego&nbsp;Real</a>
+    <nav class="hidden sm:flex gap-6 text-sm text-ash">
+      <a href="index.html" class="hover:text-gold transition">Inicio</a>
+      <a href="recetario.html" class="hover:text-gold transition">Recetario</a>
+      <a href="catalogo.html" class="hover:text-gold transition">Salsas</a>
+      <a href="bar.html" class="hover:text-gold transition">Bar</a>
+      <a href="admin.html" class="text-gold">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-3xl mx-auto px-6 py-10">
+  <p class="text-ember font-semibold tracking-widest text-xs uppercase mb-2">Panel del cocinero</p>
+  <h1 class="font-display text-4xl md:text-5xl mb-2">Panel de contenido</h1>
+  <p class="text-smoke/80 mb-8">Todo lo que agregues aquí se guarda en tu navegador y aparece de inmediato en el sitio: recetas, salsas/acompañamientos y bebidas del Bar.</p>
+
+  <!-- PESTAÑAS -->
+  <div class="flex flex-wrap gap-2 mb-8 border-b border-ash/30">
+    <button data-tab="recetas" class="tab-btn tab-activo px-4 py-3 text-sm font-semibold">Recetas</button>
+    <button data-tab="catalogo" class="tab-btn px-4 py-3 text-sm font-semibold">Salsas y Acompañamientos</button>
+    <button data-tab="bar" class="tab-btn px-4 py-3 text-sm font-semibold">Bebidas (Bar)</button>
+  </div>
+
+  <div id="mensaje-exito" class="hidden mb-6 rounded-lg border px-4 py-3 text-sm"></div>
+
+  <!-- ============================================================
+       PESTAÑA: RECETAS
+       ============================================================ -->
+  <section id="tab-recetas" class="tab-panel">
+    <form id="form-receta" class="space-y-8">
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-4 text-ember">1. Datos generales</h2>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1" for="titulo">Título de la receta *</label>
+          <input required id="titulo" name="titulo" type="text" placeholder="Ej. Costillar de Res en Caja China"
+            class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          <p class="text-xs text-ash mt-1">El slug de la URL se genera automáticamente: <span id="slug-preview" class="font-mono text-ember"></span></p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="equipo">Equipo / Técnica *</label>
+            <select required id="equipo" name="equipo" class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember">
+              <option value="">Selecciona…</option>
+              <option value="caja-china">Caja China</option>
+              <option value="cilindro">Cilindro</option>
+              <option value="parrilla">Parrilla</option>
+              <option value="horno-barro">Horno de Barro</option>
+              <option value="cocina-convencional">Cocina Convencional</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="carne">Proteína / Carne *</label>
+            <select required id="carne" name="carne" class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember">
+              <option value="">Selecciona…</option>
+              <option value="res">Res</option>
+              <option value="cerdo">Cerdo</option>
+              <option value="pollo">Pollo</option>
+              <option value="cordero">Cordero</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="tiempoPrep">Tiempo de preparación *</label>
+            <input required id="tiempoPrep" name="tiempoPrep" type="text" placeholder="Ej. 20 min"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="tiempoCoccion">Tiempo de cocción *</label>
+            <input required id="tiempoCoccion" name="tiempoCoccion" type="text" placeholder="Ej. 2 h 30 min"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="porciones">Porciones *</label>
+            <input required id="porciones" name="porciones" type="number" min="1" placeholder="Ej. 4"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1" for="imagen">URL de la imagen principal</label>
+          <input id="imagen" name="imagen" type="url" placeholder="https://…"
+            class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" for="descripcion">Descripción breve *</label>
+          <textarea required id="descripcion" name="descripcion" rows="3" placeholder="Una o dos frases que resuman la receta…"
+            class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+        </div>
+      </section>
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-1 text-ember">2. Ingredientes</h2>
+        <p class="text-xs text-ash mb-3">Escribe un ingrediente por línea.</p>
+        <textarea required id="ingredientes" name="ingredientes" rows="6"
+          placeholder="1 kg de carne&#10;2 cucharadas de sal&#10;3 dientes de ajo…"
+          class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+      </section>
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-1 text-ember">3. Pasos de preparación</h2>
+        <p class="text-xs text-ash mb-3">Escribe un paso por línea, redactado en orden.</p>
+        <textarea required id="pasos" name="pasos" rows="8"
+          placeholder="Sazona la carne con sal y pimienta…&#10;Enciende el carbón…&#10;Cocina por 2 horas…"
+          class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+      </section>
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-1 text-ember">4. Maridaje sugerido</h2>
+        <p class="text-xs text-ash mb-4">Selecciona una o varias opciones (Ctrl/Cmd + clic para elegir varias). Aquí también aparecerán las salsas y bebidas que agregues en las otras pestañas.</p>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="maridajeSalsas">Salsas y acompañamientos</label>
+            <select multiple id="maridajeSalsas" name="maridajeSalsas" size="6"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember">
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="maridajeBebidas">Bebidas (módulo Bar)</label>
+            <select multiple id="maridajeBebidas" name="maridajeBebidas" size="6"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember">
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <div class="flex items-center gap-4">
+        <button type="submit"
+          class="bg-ember hover:bg-ember/90 text-parchment font-semibold px-6 py-3 rounded-lg transition">
+          Guardar receta
+        </button>
+        <a href="recetario.html" class="text-sm text-smoke/70 hover:text-ember transition">Ver recetario →</a>
+      </div>
+    </form>
+
+    <section class="mt-14">
+      <h2 class="font-display text-2xl mb-4">Recetas guardadas en este navegador</h2>
+      <div id="lista-guardadas" class="space-y-2"></div>
+    </section>
+  </section>
+
+  <!-- ============================================================
+       PESTAÑA: CATÁLOGO (SALSAS Y ACOMPAÑAMIENTOS)
+       ============================================================ -->
+  <section id="tab-catalogo" class="tab-panel hidden">
+    <form id="form-catalogo" class="space-y-8">
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-4 text-ember">1. Datos generales</h2>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1" for="cat-nombre">Nombre *</label>
+          <input required id="cat-nombre" type="text" placeholder="Ej. Salsa Huancaína"
+            class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          <p class="text-xs text-ash mt-1">Slug: <span id="cat-slug-preview" class="font-mono text-ember"></span></p>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="cat-tipo">Tipo *</label>
+            <select required id="cat-tipo" class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember">
+              <option value="">Selecciona…</option>
+              <option value="salsa">Salsa</option>
+              <option value="acompanamiento">Acompañamiento</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="cat-tiempoPrep">Tiempo de preparación *</label>
+            <input required id="cat-tiempoPrep" type="text" placeholder="Ej. 15 min"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="cat-porciones">Porciones *</label>
+            <input required id="cat-porciones" type="number" min="1" placeholder="Ej. 4"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1" for="cat-imagen">URL de la imagen</label>
+          <input id="cat-imagen" type="url" placeholder="https://…"
+            class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" for="cat-descripcion">Descripción breve *</label>
+          <textarea required id="cat-descripcion" rows="3" placeholder="Una o dos frases que resuman la preparación…"
+            class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+        </div>
+      </section>
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-1 text-ember">2. Ingredientes</h2>
+        <p class="text-xs text-ash mb-3">Un ingrediente por línea.</p>
+        <textarea id="cat-ingredientes" rows="5" placeholder="2 tazas de ají amarillo&#10;1 taza de queso fresco&#10;…"
+          class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+      </section>
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-1 text-ember">3. Preparación</h2>
+        <p class="text-xs text-ash mb-3">Un paso por línea, redactado en orden.</p>
+        <textarea id="cat-pasos" rows="6" placeholder="Licúa los ingredientes…&#10;Cocina a fuego lento…&#10;…"
+          class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+      </section>
+
+      <div class="flex items-center gap-4">
+        <button type="submit" class="bg-ember hover:bg-ember/90 text-parchment font-semibold px-6 py-3 rounded-lg transition">
+          Guardar en el catálogo
+        </button>
+        <a href="catalogo.html" class="text-sm text-smoke/70 hover:text-ember transition">Ver catálogo →</a>
+      </div>
+    </form>
+
+    <section class="mt-14">
+      <h2 class="font-display text-2xl mb-4">Salsas y acompañamientos guardados</h2>
+      <div id="lista-catalogo-guardados" class="space-y-2"></div>
+    </section>
+  </section>
+
+  <!-- ============================================================
+       PESTAÑA: BAR (BEBIDAS)
+       ============================================================ -->
+  <section id="tab-bar" class="tab-panel hidden">
+    <form id="form-bar" class="space-y-8">
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-4 text-ember">1. Datos generales</h2>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1" for="bar-nombre">Nombre *</label>
+          <input required id="bar-nombre" type="text" placeholder="Ej. Chilcano de Pisco"
+            class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          <p class="text-xs text-ash mt-1">Slug: <span id="bar-slug-preview" class="font-mono text-ember"></span></p>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="bar-tipo">Tipo *</label>
+            <select required id="bar-tipo" class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember">
+              <option value="">Selecciona…</option>
+              <option value="coctel">Coctel</option>
+              <option value="vino">Vino</option>
+              <option value="cerveza">Cerveza</option>
+              <option value="sin-alcohol">Sin alcohol</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="bar-tiempoPrep">Tiempo de preparación *</label>
+            <input required id="bar-tiempoPrep" type="text" placeholder="Ej. 5 min"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="bar-porciones">Porciones *</label>
+            <input required id="bar-porciones" type="number" min="1" placeholder="Ej. 1"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1" for="bar-imagen">URL de la imagen</label>
+          <input id="bar-imagen" type="url" placeholder="https://…"
+            class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" for="bar-descripcion">Descripción breve *</label>
+          <textarea required id="bar-descripcion" rows="3" placeholder="Una o dos frases que resuman la bebida…"
+            class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+        </div>
+      </section>
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-1 text-ember">2. Ingredientes</h2>
+        <p class="text-xs text-ash mb-3">Un ingrediente por línea.</p>
+        <textarea id="bar-ingredientes" rows="5" placeholder="3 oz de pisco&#10;1 oz de jugo de limón&#10;…"
+          class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+      </section>
+
+      <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
+        <h2 class="font-display text-xl mb-1 text-ember">3. Preparación</h2>
+        <p class="text-xs text-ash mb-3">Un paso por línea, redactado en orden.</p>
+        <textarea id="bar-pasos" rows="6" placeholder="Vierte los ingredientes en la coctelera…&#10;Agita con hielo…&#10;…"
+          class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+      </section>
+
+      <div class="flex items-center gap-4">
+        <button type="submit" class="bg-ember hover:bg-ember/90 text-parchment font-semibold px-6 py-3 rounded-lg transition">
+          Guardar en el Bar
+        </button>
+        <a href="bar.html" class="text-sm text-smoke/70 hover:text-ember transition">Ver Bar →</a>
+      </div>
+    </form>
+
+    <section class="mt-14">
+      <h2 class="font-display text-2xl mb-4">Bebidas guardadas</h2>
+      <div id="lista-bar-guardados" class="space-y-2"></div>
+    </section>
+  </section>
+
+</main>
+
+<footer class="mt-16 border-t border-ash/30 py-8 text-center text-xs text-ash">
+  Portal Gastronómico · Panel de administración local (sin servidor)
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fuego Real | Portal Gastronómico Parrillero</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          charcoal: "#1F1B18", smoke: "#3A322C", ember: "#C1440E",
+          gold: "#C89B3C", parchment: "#EDE4D3", ash: "#8B8378"
+        },
+        fontFamily: { display: ["Fraunces", "serif"], body: ["Inter", "sans-serif"] }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="css/custom.css" />
+</head>
+<body class="bg-parchment text-charcoal font-body">
+
+<header class="bg-charcoal text-parchment sticky top-0 z-50 border-b-4 border-ember">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="font-display text-2xl tracking-tight">Fuego&nbsp;Real</a>
+    <nav class="hidden sm:flex gap-6 text-sm text-ash">
+      <a href="index.html" class="text-gold">Inicio</a>
+      <a href="recetario.html" class="hover:text-gold transition">Recetario</a>
+      <a href="catalogo.html" class="hover:text-gold transition">Salsas</a>
+      <a href="bar.html" class="hover:text-gold transition">Bar</a>
+      <a href="admin.html" class="hover:text-gold transition">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="bg-charcoal text-parchment">
+  <div class="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <p class="text-gold font-semibold tracking-widest text-xs uppercase mb-4">Caja China · Cilindro · Parrilla · Horno de Barro</p>
+      <h1 class="font-display text-5xl md:text-6xl leading-tight mb-6">El fuego cuenta<br/>su propia receta.</h1>
+      <p class="text-ash text-lg mb-8 max-w-md">Un recetario parrillero redactado con calma: elige tu equipo, tu carne, y encuentra la técnica exacta con su maridaje ideal.</p>
+      <div class="flex gap-4">
+        <a href="recetario.html" class="bg-ember hover:bg-ember/90 px-6 py-3 rounded-lg font-semibold transition">Explorar recetario</a>
+        <a href="admin.html" class="border border-ash/50 hover:border-gold hover:text-gold px-6 py-3 rounded-lg transition">Redactar receta</a>
+      </div>
+    </div>
+    <div class="rounded-2xl overflow-hidden">
+      <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop" alt="Asado a la parrilla" class="w-full h-96 object-cover" />
+    </div>
+  </div>
+</section>
+
+<!-- ACCESOS RÁPIDOS POR EQUIPO -->
+<section class="max-w-6xl mx-auto px-6 py-16">
+  <h2 class="font-display text-3xl mb-2">Empieza por tu equipo</h2>
+  <p class="text-smoke/70 mb-8">Cada técnica tiene sus propios tiempos y secretos.</p>
+  <div id="grid-equipos" class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4"></div>
+</section>
+
+<!-- RECETAS DESTACADAS -->
+<section class="max-w-6xl mx-auto px-6 py-16 border-t border-ash/30">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h2 class="font-display text-3xl mb-2">Recetas destacadas</h2>
+      <p class="text-smoke/70">Las últimas incorporaciones al recetario.</p>
+    </div>
+    <a href="recetario.html" class="text-ember hover:underline text-sm whitespace-nowrap">Ver todas →</a>
+  </div>
+  <div id="grid-destacadas" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</section>
+
+<!-- MÓDULOS -->
+<section class="max-w-6xl mx-auto px-6 py-16 border-t border-ash/30 grid sm:grid-cols-2 gap-6">
+  <a href="catalogo.html" class="bg-white/70 border border-ash/30 rounded-xl p-8 hover:border-ember transition">
+    <h3 class="font-display text-2xl mb-2">Salsas y Acompañamientos</h3>
+    <p class="text-smoke/70 text-sm">Chimichurris, cremas y guarniciones que aparecen en el maridaje de cada receta.</p>
+  </a>
+  <a href="bar.html" class="bg-white/70 border border-ash/30 rounded-xl p-8 hover:border-ember transition">
+    <h3 class="font-display text-2xl mb-2">Bar y Coctelería</h3>
+    <p class="text-smoke/70 text-sm">Bebidas con y sin alcohol pensadas para acompañar carnes a la brasa.</p>
+  </a>
+</section>
+
+<footer class="mt-8 border-t border-ash/30 py-8 text-center text-xs text-ash">
+  Portal Gastronómico · Sitio 100% estático, funciona con HTML, JS y localStorage
+</footer>
+
+<script src="js/data.js"></script>
+<script>
+  const equipos = [
+    { valor: "caja-china", nombre: "Caja China" },
+    { valor: "cilindro", nombre: "Cilindro" },
+    { valor: "parrilla", nombre: "Parrilla" },
+    { valor: "horno-barro", nombre: "Horno de Barro" },
+    { valor: "cocina-convencional", nombre: "Cocina Convencional" }
+  ];
+
+  document.getElementById("grid-equipos").innerHTML = equipos.map((eq) => `
+    <a href="recetario.html?equipo=${eq.valor}" class="bg-white/70 border border-ash/30 rounded-xl p-5 text-center hover:border-ember hover:-translate-y-1 transition">
+      <p class="font-display text-lg">${eq.nombre}</p>
+    </a>
+  `).join("");
+
+  const destacadas = DataManager.getRecetas().slice(0, 3);
+  document.getElementById("grid-destacadas").innerHTML = destacadas.map((r) => `
+    <a href="receta.html?slug=${r.slug}" class="group block bg-white/70 border border-ash/30 rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition">
+      <div class="h-44 overflow-hidden">
+        <img src="${r.imagen}" alt="${r.titulo}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+      </div>
+      <div class="p-5">
+        <span class="text-[11px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-1 rounded-full">${DataManager.LABELS_CARNE[r.carne] || r.carne}</span>
+        <h3 class="font-display text-lg mt-2 mb-1 group-hover:text-ember transition">${r.titulo}</h3>
+        <p class="text-sm text-smoke/70 line-clamp-2">${r.descripcion}</p>
+      </div>
+    </a>
+  `).join("");
+</script>
+</body>
+</html>
