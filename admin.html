@@ -63,6 +63,7 @@
        ============================================================ -->
   <section id="tab-recetas" class="tab-panel">
     <form id="form-receta" class="space-y-8">
+      <input type="hidden" id="receta-editando-slug" value="" />
 
       <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
         <h2 class="font-display text-xl mb-4 text-ember">1. Datos generales</h2>
@@ -165,17 +166,25 @@
         </div>
       </section>
 
+      <div id="aviso-editando-receta" class="hidden bg-gold/10 border border-gold text-smoke text-sm rounded-lg px-4 py-3">
+        ✏️ Editando: <span id="aviso-editando-receta-nombre" class="font-semibold"></span>
+      </div>
+
       <div class="flex items-center gap-4">
-        <button type="submit"
+        <button type="submit" id="btn-guardar-receta"
           class="bg-ember hover:bg-ember/90 text-parchment font-semibold px-6 py-3 rounded-lg transition">
           Guardar receta
+        </button>
+        <button type="button" id="btn-cancelar-edicion-receta" class="hidden text-sm text-smoke/70 hover:text-ember transition">
+          Cancelar edición
         </button>
         <a href="recetario.html" class="text-sm text-smoke/70 hover:text-ember transition">Ver recetario →</a>
       </div>
     </form>
 
     <section class="mt-14">
-      <h2 class="font-display text-2xl mb-4">Recetas guardadas en este navegador</h2>
+      <h2 class="font-display text-2xl mb-4">Todas las recetas</h2>
+      <p class="text-xs text-ash mb-4">Incluye tanto las recetas de fábrica como las que has agregado. Puedes editar o eliminar cualquiera.</p>
       <div id="lista-guardadas" class="space-y-2"></div>
     </section>
   </section>
@@ -185,6 +194,7 @@
        ============================================================ -->
   <section id="tab-catalogo" class="tab-panel hidden">
     <form id="form-catalogo" class="space-y-8">
+      <input type="hidden" id="catalogo-editando-slug" value="" />
 
       <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
         <h2 class="font-display text-xl mb-4 text-ember">1. Datos generales</h2>
@@ -244,16 +254,24 @@
           class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
       </section>
 
+      <div id="aviso-editando-catalogo" class="hidden bg-gold/10 border border-gold text-smoke text-sm rounded-lg px-4 py-3">
+        ✏️ Editando: <span id="aviso-editando-catalogo-nombre" class="font-semibold"></span>
+      </div>
+
       <div class="flex items-center gap-4">
-        <button type="submit" class="bg-ember hover:bg-ember/90 text-parchment font-semibold px-6 py-3 rounded-lg transition">
+        <button type="submit" id="btn-guardar-catalogo" class="bg-ember hover:bg-ember/90 text-parchment font-semibold px-6 py-3 rounded-lg transition">
           Guardar en el catálogo
+        </button>
+        <button type="button" id="btn-cancelar-edicion-catalogo" class="hidden text-sm text-smoke/70 hover:text-ember transition">
+          Cancelar edición
         </button>
         <a href="catalogo.html" class="text-sm text-smoke/70 hover:text-ember transition">Ver catálogo →</a>
       </div>
     </form>
 
     <section class="mt-14">
-      <h2 class="font-display text-2xl mb-4">Salsas y acompañamientos guardados</h2>
+      <h2 class="font-display text-2xl mb-4">Todas las salsas y acompañamientos</h2>
+      <p class="text-xs text-ash mb-4">Incluye tanto los de fábrica como los que has agregado. Puedes editar o eliminar cualquiera.</p>
       <div id="lista-catalogo-guardados" class="space-y-2"></div>
     </section>
   </section>
@@ -263,6 +281,7 @@
        ============================================================ -->
   <section id="tab-bar" class="tab-panel hidden">
     <form id="form-bar" class="space-y-8">
+      <input type="hidden" id="bar-editando-slug" value="" />
 
       <section class="bg-white/60 border border-ash/30 rounded-xl p-6">
         <h2 class="font-display text-xl mb-4 text-ember">1. Datos generales</h2>
@@ -324,16 +343,24 @@
           class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
       </section>
 
+      <div id="aviso-editando-bar" class="hidden bg-gold/10 border border-gold text-smoke text-sm rounded-lg px-4 py-3">
+        ✏️ Editando: <span id="aviso-editando-bar-nombre" class="font-semibold"></span>
+      </div>
+
       <div class="flex items-center gap-4">
-        <button type="submit" class="bg-ember hover:bg-ember/90 text-parchment font-semibold px-6 py-3 rounded-lg transition">
+        <button type="submit" id="btn-guardar-bar" class="bg-ember hover:bg-ember/90 text-parchment font-semibold px-6 py-3 rounded-lg transition">
           Guardar en el Bar
+        </button>
+        <button type="button" id="btn-cancelar-edicion-bar" class="hidden text-sm text-smoke/70 hover:text-ember transition">
+          Cancelar edición
         </button>
         <a href="bar.html" class="text-sm text-smoke/70 hover:text-ember transition">Ver Bar →</a>
       </div>
     </form>
 
     <section class="mt-14">
-      <h2 class="font-display text-2xl mb-4">Bebidas guardadas</h2>
+      <h2 class="font-display text-2xl mb-4">Todas las bebidas</h2>
+      <p class="text-xs text-ash mb-4">Incluye tanto las de fábrica como las que has agregado. Puedes editar o eliminar cualquiera.</p>
       <div id="lista-bar-guardados" class="space-y-2"></div>
     </section>
   </section>

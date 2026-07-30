@@ -461,8 +461,11 @@ const RECETAS_BASE = [
    clave y se combinan en tiempo real con RECETAS_BASE.
    ---------------------------------------------------------- */
 const LS_KEY_RECETAS = "portal_gastronomico_recetas_usuario";
+const LS_KEY_RECETAS_OCULTAS = "portal_gastronomico_recetas_ocultas";
 const LS_KEY_CATALOGO = "portal_gastronomico_catalogo_usuario";
+const LS_KEY_CATALOGO_OCULTAS = "portal_gastronomico_catalogo_ocultas";
 const LS_KEY_BAR = "portal_gastronomico_bar_usuario";
+const LS_KEY_BAR_OCULTAS = "portal_gastronomico_bar_ocultas";
 
 const DataManager = {
   /** Devuelve solo las recetas guardadas por el usuario en localStorage */
@@ -476,13 +479,30 @@ const DataManager = {
     }
   },
 
-  /** Devuelve TODAS las recetas: las base + las del usuario, sin duplicar slugs */
+  /** Slugs de recetas base que el usuario eliminó desde el panel de administración */
+  getRecetasOcultas() {
+    try {
+      const raw = localStorage.getItem(LS_KEY_RECETAS_OCULTAS);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  /** Devuelve TODAS las recetas visibles: base + usuario, sin duplicar slugs, sin las ocultas */
   getRecetas() {
     const usuario = this.getRecetasUsuario();
+    const ocultas = new Set(this.getRecetasOcultas());
     const slugsUsuario = new Set(usuario.map((r) => r.slug));
-    const base = RECETAS_BASE.filter((r) => !slugsUsuario.has(r.slug));
+    const base = RECETAS_BASE.filter((r) => !slugsUsuario.has(r.slug) && !ocultas.has(r.slug));
+    const usuarioVisible = usuario.filter((r) => !ocultas.has(r.slug));
     // Las recetas de usuario se muestran primero (más recientes)
-    return [...usuario, ...base];
+    return [...usuarioVisible, ...base];
+  },
+
+  /** Indica si una receta viene de las recetas base (de fábrica) del sitio */
+  esRecetaBase(slug) {
+    return RECETAS_BASE.some((r) => r.slug === slug);
   },
 
   /** Busca una receta por su slug en el conjunto combinado */
@@ -500,13 +520,26 @@ const DataManager = {
       usuario.unshift(receta);
     }
     localStorage.setItem(LS_KEY_RECETAS, JSON.stringify(usuario));
+
+    // Si se estaba editando una receta base que había sido ocultada, se reactiva
+    const ocultas = this.getRecetasOcultas().filter((s) => s !== receta.slug);
+    localStorage.setItem(LS_KEY_RECETAS_OCULTAS, JSON.stringify(ocultas));
+
     return receta;
   },
 
-  /** Elimina una receta de usuario por slug */
+  /** Elimina una receta por slug: quita la versión de usuario (si existe) y oculta la base (si aplica) */
   eliminarReceta(slug) {
     const usuario = this.getRecetasUsuario().filter((r) => r.slug !== slug);
     localStorage.setItem(LS_KEY_RECETAS, JSON.stringify(usuario));
+
+    if (this.esRecetaBase(slug)) {
+      const ocultas = this.getRecetasOcultas();
+      if (!ocultas.includes(slug)) {
+        ocultas.push(slug);
+        localStorage.setItem(LS_KEY_RECETAS_OCULTAS, JSON.stringify(ocultas));
+      }
+    }
   },
 
   /** Genera un slug URL-friendly a partir de un título */
@@ -535,12 +568,27 @@ const DataManager = {
     }
   },
 
-  /** Devuelve TODO el catálogo: base + usuario, sin duplicar slugs */
+  getCatalogoOcultas() {
+    try {
+      const raw = localStorage.getItem(LS_KEY_CATALOGO_OCULTAS);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  esCatalogoBase(slug) {
+    return CATALOGO_SALSAS.some((c) => c.slug === slug);
+  },
+
+  /** Devuelve TODO el catálogo visible: base + usuario, sin duplicar slugs, sin los ocultos */
   getCatalogo() {
     const usuario = this.getCatalogoUsuario();
+    const ocultas = new Set(this.getCatalogoOcultas());
     const slugsUsuario = new Set(usuario.map((c) => c.slug));
-    const base = CATALOGO_SALSAS.filter((c) => !slugsUsuario.has(c.slug));
-    return [...usuario, ...base];
+    const base = CATALOGO_SALSAS.filter((c) => !slugsUsuario.has(c.slug) && !ocultas.has(c.slug));
+    const usuarioVisible = usuario.filter((c) => !ocultas.has(c.slug));
+    return [...usuarioVisible, ...base];
   },
 
   getCatalogoBySlug(slug) {
@@ -557,12 +605,25 @@ const DataManager = {
       usuario.unshift(item);
     }
     localStorage.setItem(LS_KEY_CATALOGO, JSON.stringify(usuario));
+
+    const ocultas = this.getCatalogoOcultas().filter((s) => s !== item.slug);
+    localStorage.setItem(LS_KEY_CATALOGO_OCULTAS, JSON.stringify(ocultas));
+
     return item;
   },
 
+  /** Elimina un ítem del catálogo: quita la versión de usuario y oculta la base si aplica */
   eliminarCatalogoItem(slug) {
     const usuario = this.getCatalogoUsuario().filter((c) => c.slug !== slug);
     localStorage.setItem(LS_KEY_CATALOGO, JSON.stringify(usuario));
+
+    if (this.esCatalogoBase(slug)) {
+      const ocultas = this.getCatalogoOcultas();
+      if (!ocultas.includes(slug)) {
+        ocultas.push(slug);
+        localStorage.setItem(LS_KEY_CATALOGO_OCULTAS, JSON.stringify(ocultas));
+      }
+    }
   },
 
   /* ---------- BAR: Bebidas ---------- */
@@ -578,12 +639,27 @@ const DataManager = {
     }
   },
 
-  /** Devuelve TODAS las bebidas: base + usuario, sin duplicar slugs */
+  getBarOcultas() {
+    try {
+      const raw = localStorage.getItem(LS_KEY_BAR_OCULTAS);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  esBarBase(slug) {
+    return BAR_BEBIDAS.some((b) => b.slug === slug);
+  },
+
+  /** Devuelve TODAS las bebidas visibles: base + usuario, sin duplicar slugs, sin las ocultas */
   getBar() {
     const usuario = this.getBarUsuario();
+    const ocultas = new Set(this.getBarOcultas());
     const slugsUsuario = new Set(usuario.map((b) => b.slug));
-    const base = BAR_BEBIDAS.filter((b) => !slugsUsuario.has(b.slug));
-    return [...usuario, ...base];
+    const base = BAR_BEBIDAS.filter((b) => !slugsUsuario.has(b.slug) && !ocultas.has(b.slug));
+    const usuarioVisible = usuario.filter((b) => !ocultas.has(b.slug));
+    return [...usuarioVisible, ...base];
   },
 
   getBarBySlug(slug) {
@@ -600,12 +676,25 @@ const DataManager = {
       usuario.unshift(item);
     }
     localStorage.setItem(LS_KEY_BAR, JSON.stringify(usuario));
+
+    const ocultas = this.getBarOcultas().filter((s) => s !== item.slug);
+    localStorage.setItem(LS_KEY_BAR_OCULTAS, JSON.stringify(ocultas));
+
     return item;
   },
 
+  /** Elimina una bebida: quita la versión de usuario y oculta la base si aplica */
   eliminarBarItem(slug) {
     const usuario = this.getBarUsuario().filter((b) => b.slug !== slug);
     localStorage.setItem(LS_KEY_BAR, JSON.stringify(usuario));
+
+    if (this.esBarBase(slug)) {
+      const ocultas = this.getBarOcultas();
+      if (!ocultas.includes(slug)) {
+        ocultas.push(slug);
+        localStorage.setItem(LS_KEY_BAR_OCULTAS, JSON.stringify(ocultas));
+      }
+    }
   },
 
   /** Etiquetas legibles para equipo y carne, usadas en toda la web */
