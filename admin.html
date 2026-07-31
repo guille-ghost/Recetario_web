@@ -49,6 +49,27 @@
   <h1 class="font-display text-4xl md:text-5xl mb-2">Panel de contenido</h1>
   <p class="text-smoke/80 mb-8">Todo lo que agregues aquí se guarda en tu navegador y aparece de inmediato en el sitio: recetas, salsas/acompañamientos y bebidas del Bar.</p>
 
+  <!-- EXPORTAR / IMPORTAR RESPALDO -->
+  <section class="bg-white/60 border border-ash/30 rounded-xl p-6 mb-8">
+    <h2 class="font-display text-xl mb-1 text-ember">Respaldo de tu contenido</h2>
+    <p class="text-xs text-ash mb-4">
+      Todo lo que agregas aquí vive solo en este navegador. Exporta un respaldo para llevarlo a otro navegador/dispositivo,
+      o genera el código listo para pegar en <code class="font-mono">js/data.js</code> antes de subir el proyecto a Git.
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <button id="btn-exportar" type="button" class="bg-charcoal text-parchment text-sm font-semibold px-4 py-2 rounded-lg hover:bg-charcoal/90 transition">
+        ⬇️ Exportar respaldo (JSON)
+      </button>
+      <button id="btn-importar" type="button" class="border border-ash/50 text-sm font-semibold px-4 py-2 rounded-lg hover:border-ember hover:text-ember transition">
+        ⬆️ Importar respaldo (JSON)
+      </button>
+      <input type="file" id="input-importar" accept="application/json" class="hidden" />
+      <button id="btn-generar-codigo" type="button" class="border border-ash/50 text-sm font-semibold px-4 py-2 rounded-lg hover:border-ember hover:text-ember transition">
+        &lt;/&gt; Generar código para data.js
+      </button>
+    </div>
+  </section>
+
   <!-- PESTAÑAS -->
   <div class="flex flex-wrap gap-2 mb-8 border-b border-ash/30">
     <button data-tab="recetas" class="tab-btn tab-activo px-4 py-3 text-sm font-semibold">Recetas</button>
@@ -366,6 +387,28 @@
   </section>
 
 </main>
+
+<!-- MODAL: CÓDIGO PARA data.js -->
+<div id="modal-codigo" class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-6">
+  <div id="modal-codigo-overlay" class="absolute inset-0 bg-charcoal/70"></div>
+  <div class="relative bg-parchment w-full sm:max-w-2xl sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div class="sticky top-0 bg-parchment border-b border-ash/30 flex items-start justify-between px-6 py-4">
+      <div>
+        <h3 class="font-display text-2xl">Código para js/data.js</h3>
+        <p class="text-xs text-ash mt-1">Copia el bloque que necesites y pégalo dentro del arreglo correspondiente antes de subir a Git.</p>
+      </div>
+      <button id="modal-codigo-cerrar" aria-label="Cerrar" class="text-2xl leading-none text-ash hover:text-ember transition">&times;</button>
+    </div>
+    <div class="px-6 py-5">
+      <textarea id="codigo-generado" readonly rows="18"
+        class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-ember"></textarea>
+      <button id="btn-copiar-codigo" type="button" class="mt-4 bg-ember hover:bg-ember/90 text-parchment text-sm font-semibold px-4 py-2 rounded-lg transition">
+        Copiar al portapapeles
+      </button>
+      <span id="copiado-confirmacion" class="hidden ml-3 text-xs text-green-700">¡Copiado!</span>
+    </div>
+  </div>
+</div>
 
 <footer class="mt-16 border-t border-ash/30 py-8 text-center text-xs text-ash">
   Portal Gastronómico · Panel de administración local (sin servidor)

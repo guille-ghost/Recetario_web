@@ -426,7 +426,7 @@ const RECETAS_BASE = [
     slug: "bistec-cocina-convencional",
     titulo: "Bistec Encebollado en Cocina Convencional",
     equipo: "cocina-convencional",
-    carne: "carne",
+    carne: "res",
     tiempoPrep: "15 min",
     tiempoCoccion: "25 min",
     porciones: 4,
@@ -703,16 +703,14 @@ const DataManager = {
     "cilindro": "Cilindro",
     "parrilla": "Parrilla",
     "horno-barro": "Horno de Barro",
-    "cocina-convencional": "Cocina Convencional",
-    "airfryer": "AirFryer"
+    "cocina-convencional": "Cocina Convencional"
   },
 
   LABELS_CARNE: {
     res: "Res",
     cerdo: "Cerdo",
     pollo: "Pollo",
-    cordero: "Cordero",
-    pescado: "Pescado"
+    cordero: "Cordero"
   },
 
   LABELS_TIPO_CATALOGO: {

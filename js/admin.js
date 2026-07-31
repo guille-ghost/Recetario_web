@@ -517,6 +517,145 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /* ============================================================
+     RESPALDO: EXPORTAR / IMPORTAR / GENERAR CÓDIGO PARA data.js
+     ============================================================ */
+  const btnExportar = document.getElementById("btn-exportar");
+  const btnImportar = document.getElementById("btn-importar");
+  const inputImportar = document.getElementById("input-importar");
+  const btnGenerarCodigo = document.getElementById("btn-generar-codigo");
+
+  function refrescarTodo() {
+    llenarMultiselectsMaridaje();
+    renderGuardadas();
+    renderCatalogoGuardados();
+    renderBarGuardados();
+  }
+
+  /* ---- Exportar: descarga un .json con todo lo agregado/editado/eliminado ---- */
+  btnExportar.addEventListener("click", () => {
+    const respaldo = {
+      version: 1,
+      fecha: new Date().toISOString(),
+      recetas: DataManager.getRecetasUsuario(),
+      recetasOcultas: DataManager.getRecetasOcultas(),
+      catalogo: DataManager.getCatalogoUsuario(),
+      catalogoOcultas: DataManager.getCatalogoOcultas(),
+      bar: DataManager.getBarUsuario(),
+      barOcultas: DataManager.getBarOcultas()
+    };
+
+    const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `respaldo-fuego-real-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    mostrarMensaje("Respaldo exportado. Guarda el archivo .json en un lugar seguro.", false);
+  });
+
+  /* ---- Importar: reemplaza el contenido local con el del archivo .json ---- */
+  btnImportar.addEventListener("click", () => inputImportar.click());
+
+  inputImportar.addEventListener("change", () => {
+    const archivo = inputImportar.files[0];
+    if (!archivo) return;
+
+    const lector = new FileReader();
+    lector.onload = () => {
+      try {
+        const datos = JSON.parse(lector.result);
+
+        if (!confirm("Importar reemplazará las recetas, salsas y bebidas guardadas en este navegador por las del archivo. ¿Continuar?")) {
+          inputImportar.value = "";
+          return;
+        }
+
+        localStorage.setItem(LS_KEY_RECETAS, JSON.stringify(datos.recetas || []));
+        localStorage.setItem(LS_KEY_RECETAS_OCULTAS, JSON.stringify(datos.recetasOcultas || []));
+        localStorage.setItem(LS_KEY_CATALOGO, JSON.stringify(datos.catalogo || []));
+        localStorage.setItem(LS_KEY_CATALOGO_OCULTAS, JSON.stringify(datos.catalogoOcultas || []));
+        localStorage.setItem(LS_KEY_BAR, JSON.stringify(datos.bar || []));
+        localStorage.setItem(LS_KEY_BAR_OCULTAS, JSON.stringify(datos.barOcultas || []));
+
+        refrescarTodo();
+        mostrarMensaje("Respaldo importado correctamente.", false);
+      } catch (err) {
+        mostrarMensaje("El archivo no es un respaldo válido (JSON incorrecto).", true);
+      }
+      inputImportar.value = "";
+    };
+    lector.readAsText(archivo);
+  });
+
+  /* ---- Generar código listo para pegar en js/data.js ---- */
+  const modalCodigo = document.getElementById("modal-codigo");
+  const codigoGenerado = document.getElementById("codigo-generado");
+  const btnCopiarCodigo = document.getElementById("btn-copiar-codigo");
+  const copiadoConfirmacion = document.getElementById("copiado-confirmacion");
+
+  function generarCodigoDataJs() {
+    const recetas = DataManager.getRecetasUsuario();
+    const catalogo = DataManager.getCatalogoUsuario();
+    const bar = DataManager.getBarUsuario();
+    const bloques = [];
+
+    if (recetas.length) {
+      bloques.push(
+        `/* Pega estos objetos DENTRO del arreglo RECETAS_BASE, en js/data.js */\n` +
+        recetas.map((r) => JSON.stringify(r, null, 2)).join(",\n") + ","
+      );
+    }
+    if (catalogo.length) {
+      bloques.push(
+        `/* Pega estos objetos DENTRO del arreglo CATALOGO_SALSAS, en js/data.js */\n` +
+        catalogo.map((c) => JSON.stringify(c, null, 2)).join(",\n") + ","
+      );
+    }
+    if (bar.length) {
+      bloques.push(
+        `/* Pega estos objetos DENTRO del arreglo BAR_BEBIDAS, en js/data.js */\n` +
+        bar.map((b) => JSON.stringify(b, null, 2)).join(",\n") + ","
+      );
+    }
+
+    return bloques.length
+      ? bloques.join("\n\n")
+      : "// Todavía no has agregado ni editado nada desde este navegador.";
+  }
+
+  btnGenerarCodigo.addEventListener("click", () => {
+    codigoGenerado.value = generarCodigoDataJs();
+    copiadoConfirmacion.classList.add("hidden");
+    modalCodigo.classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
+  });
+
+  function cerrarModalCodigo() {
+    modalCodigo.classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
+  }
+
+  document.getElementById("modal-codigo-cerrar").addEventListener("click", cerrarModalCodigo);
+  document.getElementById("modal-codigo-overlay").addEventListener("click", cerrarModalCodigo);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") cerrarModalCodigo();
+  });
+
+  btnCopiarCodigo.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(codigoGenerado.value);
+    } catch (err) {
+      codigoGenerado.select();
+      document.execCommand("copy");
+    }
+    copiadoConfirmacion.classList.remove("hidden");
+  });
+
   /* ---- Inicialización ---- */
   llenarMultiselectsMaridaje();
   renderGuardadas();
