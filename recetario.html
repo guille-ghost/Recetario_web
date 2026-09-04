@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Recetario Parrillero | Fuego Real</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          charcoal: "#1F1B18",
+          smoke: "#3A322C",
+          ember: "#C1440E",
+          gold: "#C89B3C",
+          parchment: "#EDE4D3",
+          ash: "#8B8378"
+        },
+        fontFamily: {
+          display: ["Fraunces", "serif"],
+          body: ["Inter", "sans-serif"]
+        }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="css/custom.css" />
+</head>
+<body class="bg-parchment text-charcoal font-body">
+
+<header class="bg-charcoal text-parchment sticky top-0 z-50 border-b-4 border-ember">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="font-display text-2xl tracking-tight">Fuego&nbsp;Real</a>
+    <nav class="hidden sm:flex gap-6 text-sm text-ash">
+      <a href="index.html" class="hover:text-gold transition">Inicio</a>
+      <a href="recetario.html" class="text-gold">Recetario</a>
+      <a href="catalogo.html" class="hover:text-gold transition">Salsas</a>
+      <a href="bar.html" class="hover:text-gold transition">Bar</a>
+      <a href="admin.html" class="hover:text-gold transition">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 py-10">
+  <p class="text-ember font-semibold tracking-widest text-xs uppercase mb-2">Recetario parrillero</p>
+  <h1 class="font-display text-4xl md:text-5xl mb-3">Encuentra tu receta ideal</h1>
+  <p class="text-smoke/80 max-w-2xl mb-10">Elige primero tu equipo de cocción y luego la proteína. El listado se filtra al instante con las recetas que coinciden.</p>
+
+  <!-- PASO 1: EQUIPO -->
+  <section class="mb-8">
+    <div class="flex items-baseline gap-2 mb-4">
+      <span class="font-display text-ember text-xl">Paso 1</span>
+      <h2 class="font-display text-xl">¿Con qué equipo vas a cocinar?</h2>
+    </div>
+    <div id="filtro-equipo" class="flex flex-wrap gap-3">
+      <button data-value="" class="chip-equipo chip-activo" data-tipo="equipo">Todos</button>
+      <button data-value="caja-china" class="chip-equipo" data-tipo="equipo">Caja China</button>
+      <button data-value="cilindro" class="chip-equipo" data-tipo="equipo">Cilindro</button>
+      <button data-value="parrilla" class="chip-equipo" data-tipo="equipo">Parrilla</button>
+      <button data-value="horno-barro" class="chip-equipo" data-tipo="equipo">Horno de Barro</button>
+      <button data-value="cocina-convencional" class="chip-equipo" data-tipo="equipo">Cocina Convencional</button>
+    </div>
+  </section>
+
+  <!-- PASO 2: CARNE -->
+  <section class="mb-10">
+    <div class="flex items-baseline gap-2 mb-4">
+      <span class="font-display text-ember text-xl">Paso 2</span>
+      <h2 class="font-display text-xl">¿Qué proteína quieres preparar?</h2>
+    </div>
+    <div id="filtro-carne" class="flex flex-wrap gap-3">
+      <button data-value="" class="chip-carne chip-activo" data-tipo="carne">Todas</button>
+      <button data-value="res" class="chip-carne" data-tipo="carne">Res</button>
+      <button data-value="cerdo" class="chip-carne" data-tipo="carne">Cerdo</button>
+      <button data-value="pollo" class="chip-carne" data-tipo="carne">Pollo</button>
+      <button data-value="cordero" class="chip-carne" data-tipo="carne">Cordero</button>
+    </div>
+  </section>
+
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="font-display text-2xl">Resultados</h2>
+    <p id="contador-resultados" class="text-sm text-ash"></p>
+  </div>
+
+  <div id="grid-recetas" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  <p id="sin-resultados" class="hidden text-center text-ash py-16">No hay recetas para esta combinación todavía. Prueba otro filtro o agrega una receta en el panel de administración.</p>
+</main>
+
+<footer class="mt-16 border-t border-ash/30 py-8 text-center text-xs text-ash">
+  Portal Gastronómico · Recetario 100% en el navegador
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/recetario.js"></script>
+</body>
+</html>

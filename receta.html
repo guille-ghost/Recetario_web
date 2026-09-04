@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title id="tab-title">Receta | Fuego Real</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          charcoal: "#1F1B18",
+          smoke: "#3A322C",
+          ember: "#C1440E",
+          gold: "#C89B3C",
+          parchment: "#EDE4D3",
+          ash: "#8B8378"
+        },
+        fontFamily: {
+          display: ["Fraunces", "serif"],
+          body: ["Inter", "sans-serif"]
+        }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="css/custom.css" />
+</head>
+<body class="bg-parchment text-charcoal font-body">
+
+<header class="bg-charcoal text-parchment sticky top-0 z-50 border-b-4 border-ember">
+  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="font-display text-2xl tracking-tight">Fuego&nbsp;Real</a>
+    <nav class="hidden sm:flex gap-6 text-sm text-ash">
+      <a href="index.html" class="hover:text-gold transition">Inicio</a>
+      <a href="recetario.html" class="hover:text-gold transition">Recetario</a>
+      <a href="catalogo.html" class="hover:text-gold transition">Salsas</a>
+      <a href="bar.html" class="hover:text-gold transition">Bar</a>
+      <a href="admin.html" class="hover:text-gold transition">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<main id="contenido-receta" class="max-w-4xl mx-auto px-6 py-10">
+  <!-- Se rellena dinámicamente por receta-detalle.js -->
+  <p class="text-ash">Cargando receta…</p>
+</main>
+
+<!-- MODAL DE PREPARACIÓN (salsas, acompañamientos y bebidas del maridaje) -->
+<div id="modal-preparacion" class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-6">
+  <div id="modal-overlay" class="absolute inset-0 bg-charcoal/70"></div>
+  <div class="relative bg-parchment w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div class="sticky top-0 bg-parchment border-b border-ash/30 flex items-start justify-between px-6 py-4">
+      <div>
+        <p id="modal-tipo" class="text-[11px] uppercase tracking-wide bg-ember/10 text-ember inline-block px-2 py-1 rounded-full mb-1"></p>
+        <h3 id="modal-nombre" class="font-display text-2xl"></h3>
+      </div>
+      <button id="modal-cerrar" aria-label="Cerrar" class="text-2xl leading-none text-ash hover:text-ember transition">&times;</button>
+    </div>
+    <div class="px-6 py-5">
+      <p id="modal-descripcion" class="text-sm text-smoke/70 mb-4"></p>
+      <div class="flex gap-6 text-xs text-ash mb-6">
+        <p><span class="font-semibold text-charcoal">Prep:</span> <span id="modal-tiempo"></span></p>
+        <p><span class="font-semibold text-charcoal">Rinde:</span> <span id="modal-porciones"></span></p>
+      </div>
+      <h4 class="font-display text-lg mb-2 text-ember">Ingredientes</h4>
+      <ul id="modal-ingredientes" class="space-y-1 text-sm text-smoke/90 mb-6"></ul>
+      <h4 class="font-display text-lg mb-2 text-ember">Preparación</h4>
+      <ol id="modal-pasos" class="space-y-3 text-sm text-smoke/90"></ol>
+    </div>
+  </div>
+</div>
+
+<template id="tpl-no-encontrada">
+  <div class="text-center py-24">
+    <p class="text-ember font-display text-3xl mb-3">Receta no encontrada</p>
+    <p class="text-smoke/70 mb-6">El enlace no coincide con ninguna receta guardada en este navegador.</p>
+    <a href="recetario.html" class="inline-block bg-ember text-parchment px-5 py-3 rounded-lg hover:bg-ember/90 transition">Volver al recetario</a>
+  </div>
+</template>
+
+<footer class="mt-16 border-t border-ash/30 py-8 text-center text-xs text-ash">
+  Portal Gastronómico · Ficha de receta con maridaje automático
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/receta-detalle.js"></script>
+</body>
+</html>
