@@ -74,10 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tituloInput = document.getElementById("titulo");
   const slugPreview = document.getElementById("slug-preview");
   const selectSalsas = document.getElementById("maridajeSalsas");
-<<<<<<< HEAD
   const selectEnsaladas = document.getElementById("maridajeEnsaladas");
-=======
->>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
   const selectBebidas = document.getElementById("maridajeBebidas");
   const listaGuardadas = document.getElementById("lista-guardadas");
   const editandoSlugInput = document.getElementById("receta-editando-slug");
@@ -86,7 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnGuardarReceta = document.getElementById("btn-guardar-receta");
   const btnCancelarEdicionReceta = document.getElementById("btn-cancelar-edicion-receta");
 
-<<<<<<< HEAD
   function llenarMultiselectsMaridaje(seleccionadosSalsas = [], seleccionadosEnsaladas = [], seleccionadosBebidas = []) {
     selectSalsas.innerHTML = "";
     selectEnsaladas.innerHTML = "";
@@ -111,19 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
         opt.selected = seleccionadosEnsaladas.includes(item.slug);
         selectEnsaladas.appendChild(opt);
       });
-=======
-  function llenarMultiselectsMaridaje(seleccionadosSalsas = [], seleccionadosBebidas = []) {
-    selectSalsas.innerHTML = "";
-    selectBebidas.innerHTML = "";
-
-    DataManager.getCatalogo().forEach((item) => {
-      const opt = document.createElement("option");
-      opt.value = item.slug;
-      opt.textContent = item.nombre;
-      opt.selected = seleccionadosSalsas.includes(item.slug);
-      selectSalsas.appendChild(opt);
-    });
->>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
 
     DataManager.getBar().forEach((item) => {
       const opt = document.createElement("option");
@@ -154,11 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("ingredientes").value = (receta.ingredientes || []).join("\n");
     document.getElementById("pasos").value = (receta.pasos || []).join("\n");
 
-<<<<<<< HEAD
     llenarMultiselectsMaridaje(receta.maridajeSalsas || [], receta.maridajeEnsaladas || [], receta.maridajeBebidas || []);
-=======
-    llenarMultiselectsMaridaje(receta.maridajeSalsas || [], receta.maridajeBebidas || []);
->>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
 
     slugPreview.textContent = `receta.html?slug=${receta.slug} (fijo mientras editas)`;
     avisoEditandoNombre.textContent = receta.titulo;
@@ -208,10 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ingredientes: textareaALista(document.getElementById("ingredientes").value),
       pasos: textareaALista(document.getElementById("pasos").value),
       maridajeSalsas: valoresSeleccionados(selectSalsas),
-<<<<<<< HEAD
       maridajeEnsaladas: valoresSeleccionados(selectEnsaladas),
-=======
->>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
       maridajeBebidas: valoresSeleccionados(selectBebidas),
       fecha: new Date().toISOString().slice(0, 10)
     };

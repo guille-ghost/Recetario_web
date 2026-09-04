@@ -112,11 +112,7 @@ const CATALOGO_SALSAS = [
   {
     slug: "ensalada-tomate-cebolla",
     nombre: "Ensalada de Tomate y Cebolla",
-<<<<<<< HEAD
     tipo: "ensalada",
-=======
-    tipo: "acompanamiento",
->>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
     imagen: "https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=800&auto=format&fit=crop",
     descripcion: "Clásico refrescante de tomate maduro, cebolla en pluma, aceite de oliva y orégano seco. El contrapunto ideal para una parrillada abundante.",
     porciones: 4,
@@ -719,13 +715,9 @@ const DataManager = {
 
   LABELS_TIPO_CATALOGO: {
     salsa: "Salsa",
-<<<<<<< HEAD
     acompanamiento: "Acompañamiento",
     ensalada: "Ensalada",
     ensaladas: "Ensaladas"
-=======
-    acompanamiento: "Acompañamiento"
->>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
   },
 
   LABELS_TIPO_BAR: {
