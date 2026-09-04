@@ -1,0 +1,8 @@
+Para suibir modificaciones
+git add .
+git commit -m "Descripsion de la version"
+git push
+
+si sale un fatal
+
+git push --set-upstream origin main
