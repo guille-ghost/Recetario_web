@@ -111,16 +111,23 @@ function renderReceta(receta) {
     <section id="modulo-maridaje" class="border-t border-ash/30 pt-10">
       <p class="text-ember font-semibold tracking-widest text-xs uppercase mb-2">Maridaje sugerido</p>
       <h2 class="font-display text-3xl mb-6">Cómo acompañar esta receta</h2>
+<<<<<<< HEAD
       <div class="grid sm:grid-cols-3 gap-8">
+=======
+      <div class="grid sm:grid-cols-2 gap-8">
+>>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
         <div>
           <h3 class="font-display text-lg mb-3">Salsas y acompañamientos</h3>
           <div id="maridaje-salsas" class="grid gap-3"></div>
         </div>
         <div>
+<<<<<<< HEAD
           <h3 class="font-display text-lg mb-3">Ensaladas</h3>
           <div id="maridaje-ensaladas" class="grid gap-3"></div>
         </div>
         <div>
+=======
+>>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
           <h3 class="font-display text-lg mb-3">Bebidas del Bar</h3>
           <div id="maridaje-bebidas" class="grid gap-3"></div>
         </div>
@@ -204,17 +211,23 @@ function activarChecklist(receta) {
 
 function renderMaridaje(receta) {
   const contSalsas = document.getElementById("maridaje-salsas");
+<<<<<<< HEAD
   const contEnsaladas = document.getElementById("maridaje-ensaladas");
+=======
+>>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
   const contBebidas = document.getElementById("maridaje-bebidas");
 
   const salsas = (receta.maridajeSalsas || [])
     .map((slug) => DataManager.getCatalogoBySlug(slug))
     .filter(Boolean);
 
+<<<<<<< HEAD
   const ensaladas = (receta.maridajeEnsaladas || [])
     .map((slug) => DataManager.getCatalogoBySlug(slug))
     .filter(Boolean);
 
+=======
+>>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
   const bebidas = (receta.maridajeBebidas || [])
     .map((slug) => DataManager.getBarBySlug(slug))
     .filter(Boolean);
@@ -223,10 +236,13 @@ function renderMaridaje(receta) {
     ? salsas.map((item) => tarjetaMaridaje(item, "catalogo")).join("")
     : `<p class="text-sm text-ash">Sin sugerencias registradas para esta receta.</p>`;
 
+<<<<<<< HEAD
   contEnsaladas.innerHTML = ensaladas.length
     ? ensaladas.map((item) => tarjetaMaridaje(item, "catalogo")).join("")
     : `<p class="text-sm text-ash">Sin sugerencias registradas para esta receta.</p>`;
 
+=======
+>>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
   contBebidas.innerHTML = bebidas.length
     ? bebidas.map((item) => tarjetaMaridaje(item, "bar")).join("")
     : `<p class="text-sm text-ash">Sin sugerencias registradas para esta receta.</p>`;
@@ -252,7 +268,10 @@ function tarjetaMaridaje(item, origen) {
 const ETIQUETAS_TIPO = {
   salsa: "Salsa",
   acompanamiento: "Acompañamiento",
+<<<<<<< HEAD
   ensalada: "Ensalada",
+=======
+>>>>>>> 8cc445d21c10ca16dfa1bb783ce9a2b111f73b49
   coctel: "Coctel",
   vino: "Vino",
   cerveza: "Cerveza",
