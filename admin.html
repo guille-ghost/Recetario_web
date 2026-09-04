@@ -171,10 +171,16 @@
         <h2 class="font-display text-xl mb-1 text-ember">4. Maridaje sugerido</h2>
         <p class="text-xs text-ash mb-4">Selecciona una o varias opciones (Ctrl/Cmd + clic para elegir varias). Aquí también aparecerán las salsas y bebidas que agregues en las otras pestañas.</p>
 
-        <div class="grid sm:grid-cols-2 gap-4">
+        <div class="grid sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1" for="maridajeSalsas">Salsas y acompañamientos</label>
             <select multiple id="maridajeSalsas" name="maridajeSalsas" size="6"
+              class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember">
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="maridajeEnsaladas">Ensaladas</label>
+            <select multiple id="maridajeEnsaladas" name="maridajeEnsaladas" size="6"
               class="w-full rounded-lg border border-ash/40 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-ember">
             </select>
           </div>

@@ -46,6 +46,7 @@
     <button data-value="" class="chip-equipo chip-activo" data-tipo="cat">Todos</button>
     <button data-value="salsa" class="chip-equipo" data-tipo="cat">Salsas</button>
     <button data-value="acompanamiento" class="chip-equipo" data-tipo="cat">Acompañamientos</button>
+    <button data-value="ensalada" class="chip-equipo" data-tipo="cat">Ensaladas</button>
   </div>
 
   <div id="grid-catalogo" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -83,7 +84,7 @@
 <script src="js/data.js"></script>
 <script>
   const grid = document.getElementById("grid-catalogo");
-  const etiquetasCat = { salsa: "Salsa", acompanamiento: "Acompañamiento" };
+  const etiquetasCat = { salsa: "Salsa", acompanamiento: "Acompañamiento", ensalada: "Ensalada" };
 
   function pintar(filtro) {
     const items = DataManager.getCatalogo().filter((i) => !filtro || i.tipo === filtro);
