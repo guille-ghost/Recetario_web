@@ -80,8 +80,20 @@ function getSession(request) {
 }
 
 async function readJsonBody(request) {
+  const rawBody = request.body;
+  if (rawBody == null) return {};
+  if (typeof request.json === "function") return request.json();
+  if (typeof rawBody === "string") return JSON.parse(rawBody);
+  if (
+    typeof rawBody === "object" &&
+    !Symbol.asyncIterator in rawBody &&
+    !Symbol.iterator in rawBody
+  ) {
+    return rawBody;
+  }
+
   const chunks = [];
-  for await (const chunk of request.body || []) {
+  for await (const chunk of rawBody) {
     chunks.push(chunk);
   }
   const body = Buffer.concat(chunks).toString("utf8");
