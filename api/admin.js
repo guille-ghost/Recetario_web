@@ -79,6 +79,19 @@ function getSession(request) {
   return verifyToken(token);
 }
 
+function getPasswordFromRequest(request) {
+  const authorization = request.headers.authorization || "";
+  if (!authorization.toLowerCase().startsWith("basic ")) return null;
+
+  try {
+    const decoded = Buffer.from(authorization.slice(6).trim(), "base64").toString("utf8");
+    const separator = decoded.indexOf(":");
+    return separator === -1 ? null : decoded.slice(separator + 1);
+  } catch (error) {
+    return null;
+  }
+}
+
 async function readJsonBody(request) {
   const rawBody = request.body;
   if (rawBody == null) return {};
@@ -138,14 +151,17 @@ module.exports = async function handler(request, response) {
 
   if (method === "POST") {
     try {
-      const body = await readJsonBody(request);
+      const passwordFromHeader = getPasswordFromRequest(request);
+      const body = passwordFromHeader == null ? await readJsonBody(request) : {};
+
       if (body.action === "logout") {
         response.setHeader("Set-Cookie", secureCookie("", 0));
         sendJson(response, 200, { authenticated: false });
         return;
       }
 
-      if (!isCorrectPassword(body.password)) {
+      const password = passwordFromHeader ?? body.password;
+      if (!isCorrectPassword(password)) {
         sendJson(response, 401, { error: "Credenciales inválidas." });
         return;
       }

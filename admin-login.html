@@ -33,8 +33,10 @@
       try {
         const response = await fetch("/api/admin", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password })
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Basic ${btoa(`:${password}`)}`
+          }
         });
         const data = await response.json();
         if (!response.ok || !data.authenticated) {
