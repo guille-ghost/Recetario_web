@@ -11,7 +11,35 @@
    - Listados con opción de eliminar para los tres tipos
    ============================================================ */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {  const loginScreen = document.getElementById("login-screen");
+  const adminApp = document.getElementById("admin-app");
+  const btnCerrarSesion = document.getElementById("btn-cerrar-sesion");
+
+  if (loginScreen && adminApp) {
+    fetch("/api/admin", { credentials: "include" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (response.ok && data.authenticated) {
+          loginScreen.classList.add("hidden");
+          adminApp.classList.remove("hidden");
+          return;
+        }
+        window.location.replace("/admin");
+      })
+      .catch(() => window.location.replace("/admin"));
+
+    if (btnCerrarSesion) {
+      btnCerrarSesion.addEventListener("click", async () => {
+        await fetch("/api/admin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ action: "logout" })
+        });
+        window.location.replace("/admin");
+      });
+    }
+  }
   /* ----------------------------------------------------------
      PESTAÑAS
      ---------------------------------------------------------- */
