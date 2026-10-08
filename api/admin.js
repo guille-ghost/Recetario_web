@@ -84,6 +84,9 @@ async function readJsonBody(request) {
   if (rawBody == null) return {};
   if (typeof request.json === "function") return request.json();
   if (typeof rawBody === "string") return JSON.parse(rawBody);
+  if (Buffer.isBuffer(rawBody)) {
+    return rawBody.length ? JSON.parse(rawBody.toString("utf8")) : {};
+  }
   if (
     typeof rawBody === "object" &&
     !Symbol.asyncIterator in rawBody &&
@@ -94,7 +97,7 @@ async function readJsonBody(request) {
 
   const chunks = [];
   for await (const chunk of rawBody) {
-    chunks.push(chunk);
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
   const body = Buffer.concat(chunks).toString("utf8");
   return body ? JSON.parse(body) : {};
