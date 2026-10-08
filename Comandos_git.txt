@@ -6,3 +6,16 @@ git push
 si sale un fatal
 
 git push --set-upstream origin main
+
+Si realizas nuevos cambios:
+
+git add .
+git commit -m "Nuevos cambios"
+git push origin main
+
+y en cualquier otra maquina
+
+git pull origin main
+
+
+s7m7KEPn75pmXS251SF5dy3fIYZVuVXjuNiFVg-Nrsr-Xjio2EWPDWV96C_O2vCJ

@@ -32,10 +32,13 @@
       try {
         const response = await fetch("/api/admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }), credentials: "include" });
         const data = await response.json();
-        if (!response.ok || !data.authenticated) throw new Error("Credenciales inválidas");
+        if (!response.ok || !data.authenticated) {
+          message.textContent = data.error || "La contraseña no es correcta o el servicio no está disponible.";
+          return;
+        }
         window.location.href = "/admin-panel";
       } catch (error) {
-        message.textContent = "La contraseña no es correcta o el servicio no está disponible.";
+        message.textContent = "No se pudo conectar al servidor.";
       }
     });
   </script>

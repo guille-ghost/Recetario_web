@@ -38,7 +38,7 @@
         });
         const data = await response.json();
         if (!response.ok || !data.authenticated) {
-          message.textContent = "La contraseña no es correcta.";
+          message.textContent = data.error || "La contraseña no es correcta.";
           return;
         }
         window.location.href = "/admin";
