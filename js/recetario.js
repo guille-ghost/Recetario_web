@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     recetas.forEach((r) => {
       const card = document.createElement("a");
       card.href = `receta.html?slug=${r.slug}`;
-      card.className = "group block bg-white/70 border border-ash/30 rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition";
+      card.className = "group block bg-smoke/90 border border-ash/20 rounded-xl overflow-hidden hover:shadow-ember-glow hover:-translate-y-1 transition duration-300";
       card.innerHTML = `
         <div class="h-44 overflow-hidden">
           <img src="${r.imagen}" alt="${r.titulo}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
@@ -53,10 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="p-5">
           <div class="flex gap-2 mb-2">
             <span class="text-[11px] uppercase tracking-wide bg-charcoal text-parchment px-2 py-1 rounded-full">${DataManager.LABELS_EQUIPO[r.equipo] || r.equipo}</span>
-            <span class="text-[11px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-1 rounded-full">${DataManager.LABELS_CARNE[r.carne] || r.carne}</span>
+            <span class="text-[11px] uppercase tracking-wide bg-ember/20 text-ember px-2 py-1 rounded-full">${DataManager.LABELS_CARNE[r.carne] || r.carne}</span>
           </div>
           <h3 class="font-display text-lg mb-1 group-hover:text-ember transition">${r.titulo}</h3>
-          <p class="text-sm text-smoke/70 line-clamp-2">${r.descripcion}</p>
+          <p class="text-sm text-ash line-clamp-2">${r.descripcion}</p>
           <p class="text-xs text-ash mt-3">⏱ ${r.tiempoCoccion} de cocción · ${r.porciones} porciones</p>
         </div>
       `;

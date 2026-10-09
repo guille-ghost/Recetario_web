@@ -60,26 +60,26 @@ function renderReceta(receta) {
 
     <div class="mt-4 mb-6 flex gap-2">
       <span class="text-[11px] uppercase tracking-wide bg-charcoal text-parchment px-2 py-1 rounded-full">${DataManager.LABELS_EQUIPO[receta.equipo] || receta.equipo}</span>
-      <span class="text-[11px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-1 rounded-full">${DataManager.LABELS_CARNE[receta.carne] || receta.carne}</span>
+      <span class="text-[11px] uppercase tracking-wide bg-ember/20 text-ember px-2 py-1 rounded-full">${DataManager.LABELS_CARNE[receta.carne] || receta.carne}</span>
     </div>
 
     <h1 class="font-display text-4xl md:text-5xl mb-4">${receta.titulo}</h1>
-    <p class="text-smoke/80 text-lg mb-6">${receta.descripcion}</p>
+    <p class="text-ash text-lg mb-6">${receta.descripcion}</p>
 
     <div class="rounded-xl overflow-hidden mb-8">
       <img src="${receta.imagen}" alt="${receta.titulo}" class="w-full h-72 object-cover" />
     </div>
 
     <div class="grid grid-cols-3 gap-4 mb-10 text-center">
-      <div class="bg-white/60 border border-ash/30 rounded-lg py-4">
+      <div class="bg-smoke/80 border border-ash/20 rounded-lg py-4">
         <p class="text-xs text-ash uppercase tracking-wide">Preparación</p>
         <p class="font-display text-lg">${receta.tiempoPrep}</p>
       </div>
-      <div class="bg-white/60 border border-ash/30 rounded-lg py-4">
+      <div class="bg-smoke/80 border border-ash/20 rounded-lg py-4">
         <p class="text-xs text-ash uppercase tracking-wide">Cocción</p>
         <p class="font-display text-lg">${receta.tiempoCoccion}</p>
       </div>
-      <div class="bg-white/60 border border-ash/30 rounded-lg py-4">
+      <div class="bg-smoke/80 border border-ash/20 rounded-lg py-4">
         <p class="text-xs text-ash uppercase tracking-wide">Porciones</p>
         <p class="font-display text-lg">${receta.porciones}</p>
       </div>
@@ -91,14 +91,14 @@ function renderReceta(receta) {
           <h2 class="font-display text-2xl text-ember">Ingredientes</h2>
           <span id="contador-ingredientes" class="text-xs text-ash"></span>
         </div>
-        <ul class="space-y-3 text-smoke/90">${ingredientesHtml}</ul>
+        <ul class="space-y-3 text-gray-200">${ingredientesHtml}</ul>
       </section>
       <section class="md:col-span-2">
         <div class="flex items-center justify-between mb-4">
           <h2 class="font-display text-2xl text-ember">Preparación</h2>
           <span id="contador-pasos" class="text-xs text-ash"></span>
         </div>
-        <ol class="space-y-4 text-smoke/90">${pasosHtml}</ol>
+        <ol class="space-y-4 text-gray-200">${pasosHtml}</ol>
       </section>
     </div>
 
@@ -108,7 +108,7 @@ function renderReceta(receta) {
       </button>
     </div>
 
-    <section id="modulo-maridaje" class="border-t border-ash/30 pt-10">
+    <section id="modulo-maridaje" class="border-t border-ash/20 pt-10">
       <p class="text-ember font-semibold tracking-widest text-xs uppercase mb-2">Maridaje sugerido</p>
       <h2 class="font-display text-3xl mb-6">Cómo acompañar esta receta</h2>
       <div class="grid sm:grid-cols-3 gap-8">
@@ -239,7 +239,7 @@ function renderMaridaje(receta) {
 function tarjetaMaridaje(item, origen) {
   return `
     <button type="button" data-slug="${item.slug}" data-origen="${origen}"
-       class="btn-maridaje w-full text-left flex gap-3 items-center bg-white/60 border border-ash/30 rounded-lg p-3 hover:border-ember transition">
+       class="btn-maridaje w-full text-left flex gap-3 items-center bg-smoke/80 border border-ash/20 rounded-lg p-3 hover:border-ember transition">
       <img src="${item.imagen}" alt="${item.nombre}" class="w-14 h-14 rounded-md object-cover flex-shrink-0" />
       <div>
         <p class="font-medium text-sm">${item.nombre}</p>

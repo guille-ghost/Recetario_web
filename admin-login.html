@@ -6,19 +6,26 @@
   <title>Acceso privado · Portal Gastronómico</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF4500", lava: "#D92600", gold: "#E6A100", parchment: "#F3F0EC", ash: "#A0988E" },
+      fontFamily: { display: ["Cinzel Decorative", "serif"], body: ["Inter", "sans-serif"] },
+      boxShadow: { 'ember-glow': '0 0 25px -5px rgba(255, 69, 0, 0.5)', 'lava-glow': '0 0 35px -5px rgba(217, 38, 0, 0.6)' }
+    } };
+  </script>
   <link rel="stylesheet" href="css/custom.css">
 </head>
-<body class="bg-parchment text-charcoal font-body">
+<body class="bg-charcoal text-gray-100 font-body">
   <main class="min-h-screen flex items-center justify-center px-6 py-16">
-    <section class="w-full max-w-md bg-charcoal rounded-2xl p-8 text-parchment shadow-xl">
+    <section class="w-full max-w-md bg-charcoal rounded-2xl p-8 text-gray-100 shadow-xl">
       <p class="text-gold font-semibold tracking-widest text-xs uppercase mb-3">Acceso privado</p>
       <h1 class="font-display text-4xl mb-3">Panel de contenido</h1>
       <p class="text-ash text-sm mb-7">Solo el administrador autorizado puede editar recetas, salsas y bebidas.</p>
       <form id="login-form">
         <label class="block text-sm font-medium mb-2" for="admin-password">Contraseña</label>
-        <input id="admin-password" type="password" autocomplete="current-password" required class="w-full rounded-lg border border-ash/40 bg-white px-3 py-3 text-charcoal focus:outline-none focus:ring-2 focus:ring-gold">
-        <button type="submit" class="mt-4 w-full bg-ember hover:bg-ember/90 px-5 py-3 rounded-lg font-semibold transition">Entrar al panel</button>
+        <input id="admin-password" type="password" autocomplete="current-password" required class="w-full rounded-lg border border-ash/40 bg-smoke px-3 py-3 text-gray-100 focus:outline-none focus:ring-2 focus:ring-gold">
+        <button type="submit" class="mt-4 w-full bg-gradient-to-r from-ember to-lava hover:shadow-ember-glow px-5 py-3 rounded-lg font-semibold transition">Entrar al panel</button>
         <p id="login-message" role="alert" class="text-sm mt-3"></p>
       </form>
     </section>

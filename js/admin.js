@@ -244,14 +244,14 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       const esBase = DataManager.esRecetaBase(r.slug);
       const fueEditada = esBase && DataManager.getRecetasUsuario().some((u) => u.slug === r.slug);
       const fila = document.createElement("div");
-      fila.className = "flex items-center justify-between bg-white/70 border border-ash/30 rounded-lg px-4 py-3";
+      fila.className = "flex items-center justify-between bg-smoke/90 border border-ash/20 rounded-lg px-4 py-3";
       fila.innerHTML = `
         <div>
           <p class="font-medium flex items-center gap-2">
             ${r.titulo}
             ${esBase && !fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-ash/20 text-ash px-2 py-0.5 rounded-full">De fábrica</span>' : ""}
             ${fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-gold/20 text-gold px-2 py-0.5 rounded-full">Editada</span>' : ""}
-            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
+            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/20 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
           </p>
           <p class="text-xs text-ash">${DataManager.LABELS_EQUIPO[r.equipo] || r.equipo} · ${DataManager.LABELS_CARNE[r.carne] || r.carne}</p>
         </div>
@@ -382,14 +382,14 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       const esBase = DataManager.esCatalogoBase(i.slug);
       const fueEditada = esBase && DataManager.getCatalogoUsuario().some((u) => u.slug === i.slug);
       const fila = document.createElement("div");
-      fila.className = "flex items-center justify-between bg-white/70 border border-ash/30 rounded-lg px-4 py-3";
+      fila.className = "flex items-center justify-between bg-smoke/90 border border-ash/20 rounded-lg px-4 py-3";
       fila.innerHTML = `
         <div>
           <p class="font-medium flex items-center gap-2">
             ${i.nombre}
             ${esBase && !fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-ash/20 text-ash px-2 py-0.5 rounded-full">De fábrica</span>' : ""}
             ${fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-gold/20 text-gold px-2 py-0.5 rounded-full">Editada</span>' : ""}
-            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
+            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/20 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
           </p>
           <p class="text-xs text-ash">${DataManager.LABELS_TIPO_CATALOGO[i.tipo] || i.tipo}</p>
         </div>
@@ -521,14 +521,14 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       const esBase = DataManager.esBarBase(i.slug);
       const fueEditada = esBase && DataManager.getBarUsuario().some((u) => u.slug === i.slug);
       const fila = document.createElement("div");
-      fila.className = "flex items-center justify-between bg-white/70 border border-ash/30 rounded-lg px-4 py-3";
+      fila.className = "flex items-center justify-between bg-smoke/90 border border-ash/20 rounded-lg px-4 py-3";
       fila.innerHTML = `
         <div>
           <p class="font-medium flex items-center gap-2">
             ${i.nombre}
             ${esBase && !fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-ash/20 text-ash px-2 py-0.5 rounded-full">De fábrica</span>' : ""}
             ${fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-gold/20 text-gold px-2 py-0.5 rounded-full">Editada</span>' : ""}
-            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
+            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/20 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
           </p>
           <p class="text-xs text-ash">${DataManager.LABELS_TIPO_BAR[i.tipo] || i.tipo}</p>
         </div>

@@ -7,8 +7,8 @@
 
 body {
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(193, 68, 14, 0.05), transparent 40%),
-    radial-gradient(circle at 80% 0%, rgba(200, 155, 60, 0.06), transparent 35%);
+    radial-gradient(circle at 20% 10%, rgba(255, 69, 0, 0.08), transparent 40%),
+    radial-gradient(circle at 80% 0%, rgba(230, 161, 0, 0.06), transparent 35%);
 }
 
 .line-clamp-1 {
@@ -31,28 +31,28 @@ body {
   font-size: 0.875rem;
   padding: 0.5rem 1rem;
   border-radius: 9999px;
-  border: 1px solid rgba(139, 131, 119, 0.4);
-  background: rgba(255, 255, 255, 0.5);
-  color: #3A322C;
+  border: 1px solid rgba(160, 152, 142, 0.3);
+  background: rgba(28, 24, 21, 0.8);
+  color: #F3F0EC;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .chip-equipo:hover,
 .chip-carne:hover {
-  border-color: #C1440E;
-  color: #C1440E;
+  border-color: #FF4500;
+  color: #FF6A32;
 }
 
 .chip-activo {
-  background: #1F1B18 !important;
-  color: #EDE4D3 !important;
-  border-color: #1F1B18 !important;
+  background: #D92600 !important;
+  color: #FFF7F2 !important;
+  border-color: #FF4500 !important;
 }
 
 /* Pestañas del panel de administración */
 .tab-btn {
-  color: #8B8378;
+  color: #A0988E;
   border-bottom: 3px solid transparent;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -60,12 +60,12 @@ body {
 }
 
 .tab-btn:hover {
-  color: #C1440E;
+  color: #FF6A32;
 }
 
 .tab-activo {
-  color: #C1440E !important;
-  border-bottom-color: #C1440E !important;
+  color: #FF6A32 !important;
+  border-bottom-color: #FF4500 !important;
 }
 
 /* Foco visible para accesibilidad de teclado */
@@ -74,6 +74,6 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #C1440E;
+  outline: 2px solid #FF6A32;
   outline-offset: 2px;
 }

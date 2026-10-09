@@ -6,25 +6,26 @@
 <title>Salsas y Acompañamientos | El Festin de Belcebu</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
   tailwind.config = {
     theme: {
       extend: {
         colors: {
-          charcoal: "#1F1B18", smoke: "#3A322C", ember: "#C1440E",
-          gold: "#C89B3C", parchment: "#EDE4D3", ash: "#8B8378"
+          charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF4500", lava: "#D92600",
+          gold: "#E6A100", parchment: "#F3F0EC", ash: "#A0988E"
         },
-        fontFamily: { display: ["Fraunces", "serif"], body: ["Inter", "sans-serif"] }
+        fontFamily: { display: ["Cinzel Decorative", "serif"], body: ["Inter", "sans-serif"] },
+        boxShadow: { 'ember-glow': '0 0 25px -5px rgba(255, 69, 0, 0.5)', 'lava-glow': '0 0 35px -5px rgba(217, 38, 0, 0.6)' }
       }
     }
   };
 </script>
 <link rel="stylesheet" href="css/custom.css" />
 </head>
-<body class="bg-parchment text-charcoal font-body">
+<body class="bg-charcoal text-gray-100 font-body">
 
-<header class="bg-charcoal text-parchment sticky top-0 z-50 border-b-4 border-ember">
+<header class="bg-charcoal text-gray-100 sticky top-0 z-50 border-b border-ember/40">
   <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
     <a href="index.html" class="font-display text-2xl tracking-tight">Fuego&nbsp;Real</a>
     <nav class="hidden sm:flex gap-6 text-sm text-ash">
@@ -39,7 +40,7 @@
 <main class="max-w-6xl mx-auto px-6 py-10">
   <p class="text-ember font-semibold tracking-widest text-xs uppercase mb-2">Catálogo</p>
   <h1 class="font-display text-4xl md:text-5xl mb-3">Salsas y Acompañamientos</h1>
-  <p class="text-smoke/80 max-w-2xl mb-10">Estas son las mismas salsas y guarniciones que aparecen automáticamente en el módulo de maridaje de cada receta.</p>
+  <p class="text-ash max-w-2xl mb-10">Estas son las mismas salsas y guarniciones que aparecen automáticamente en el módulo de maridaje de cada receta.</p>
 
   <div class="flex flex-wrap gap-3 mb-8" id="filtro-tipo">
     <button data-value="" class="chip-equipo chip-activo" data-tipo="cat">Todos</button>
@@ -54,29 +55,29 @@
 <!-- MODAL DE PREPARACIÓN -->
 <div id="modal-preparacion" class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-6">
   <div id="modal-overlay" class="absolute inset-0 bg-charcoal/70"></div>
-  <div class="relative bg-parchment w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-    <div class="sticky top-0 bg-parchment border-b border-ash/30 flex items-start justify-between px-6 py-4">
+  <div class="relative bg-charcoal w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div class="sticky top-0 bg-charcoal border-b border-ash/20 flex items-start justify-between px-6 py-4">
       <div>
-        <p id="modal-tipo" class="text-[11px] uppercase tracking-wide bg-ember/10 text-ember inline-block px-2 py-1 rounded-full mb-1"></p>
+        <p id="modal-tipo" class="text-[11px] uppercase tracking-wide bg-ember/20 text-ember inline-block px-2 py-1 rounded-full mb-1"></p>
         <h3 id="modal-nombre" class="font-display text-2xl"></h3>
       </div>
       <button id="modal-cerrar" aria-label="Cerrar" class="text-2xl leading-none text-ash hover:text-ember transition">&times;</button>
     </div>
     <div class="px-6 py-5">
-      <p id="modal-descripcion" class="text-sm text-smoke/70 mb-4"></p>
+      <p id="modal-descripcion" class="text-sm text-ash mb-4"></p>
       <div class="flex gap-6 text-xs text-ash mb-6">
-        <p><span class="font-semibold text-charcoal">Prep:</span> <span id="modal-tiempo"></span></p>
-        <p><span class="font-semibold text-charcoal">Rinde:</span> <span id="modal-porciones"></span></p>
+        <p><span class="font-semibold text-gray-100">Prep:</span> <span id="modal-tiempo"></span></p>
+        <p><span class="font-semibold text-gray-100">Rinde:</span> <span id="modal-porciones"></span></p>
       </div>
       <h4 class="font-display text-lg mb-2 text-ember">Ingredientes</h4>
-      <ul id="modal-ingredientes" class="space-y-1 text-sm text-smoke/90 mb-6"></ul>
+      <ul id="modal-ingredientes" class="space-y-1 text-sm text-gray-200 mb-6"></ul>
       <h4 class="font-display text-lg mb-2 text-ember">Preparación</h4>
-      <ol id="modal-pasos" class="space-y-3 text-sm text-smoke/90"></ol>
+      <ol id="modal-pasos" class="space-y-3 text-sm text-gray-200"></ol>
     </div>
   </div>
 </div>
 
-<footer class="mt-16 border-t border-ash/30 py-8 text-center text-xs text-ash">
+<footer class="mt-16 border-t border-ash/20 py-8 text-center text-xs text-ash">
   Portal Gastronómico · Catálogo de salsas y acompañamientos
 </footer>
 
@@ -88,14 +89,14 @@
   function pintar(filtro) {
     const items = DataManager.getCatalogo().filter((i) => !filtro || i.tipo === filtro);
     grid.innerHTML = items.map((i) => `
-      <div class="bg-white/70 border border-ash/30 rounded-xl overflow-hidden flex flex-col">
+      <div class="bg-smoke/90 border border-ash/20 rounded-xl overflow-hidden flex flex-col">
         <div class="h-40 overflow-hidden">
           <img src="${i.imagen}" alt="${i.nombre}" class="w-full h-full object-cover" />
         </div>
         <div class="p-5 flex flex-col flex-1">
-          <span class="text-[11px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-1 rounded-full self-start">${etiquetasCat[i.tipo] || i.tipo}</span>
+          <span class="text-[11px] uppercase tracking-wide bg-ember/20 text-ember px-2 py-1 rounded-full self-start">${etiquetasCat[i.tipo] || i.tipo}</span>
           <h3 class="font-display text-lg mt-2 mb-1">${i.nombre}</h3>
-          <p class="text-sm text-smoke/70 flex-1">${i.descripcion}</p>
+          <p class="text-sm text-ash flex-1">${i.descripcion}</p>
           ${i.pasos && i.pasos.length ? `
             <button data-slug="${i.slug}" class="btn-ver-preparacion mt-4 text-sm font-semibold text-ember hover:underline self-start">
               Ver preparación →
@@ -128,7 +129,7 @@
     document.getElementById("modal-pasos").innerHTML = (item.pasos || [])
       .map((paso, idx) => `
         <li class="flex gap-3">
-          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-charcoal text-parchment font-display flex items-center justify-center text-xs">${idx + 1}</span>
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-charcoal text-gray-100 font-display flex items-center justify-center text-xs">${idx + 1}</span>
           <p class="pt-0.5">${paso}</p>
         </li>`)
       .join("") || `<li class="text-ash">Sin pasos registrados.</li>`;
