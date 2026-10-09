@@ -529,6 +529,11 @@ const DataManager = {
   },
 
   async getRecetas() {
+    // Permite que el recetario siga mostrando su contenido base antes de configurar Supabase.
+    if (!window.supabaseClient) {
+      console.warn("Supabase aún no está configurado; se muestran las recetas base locales.");
+      return [...RECETAS_BASE];
+    }
     const { data, error } = await this.clienteSupabase().from("recetas").select("*");
     if (error) throw error;
     const filas = (data || []).map((row) => this.recetaDesdeFila(row));
