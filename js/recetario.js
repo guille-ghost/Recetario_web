@@ -26,8 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function renderTarjetas() {
-    const recetas = DataManager.getRecetas().filter((r) => {
+  async function renderTarjetas() {
+    const recetas = (await DataManager.getRecetas()).filter((r) => {
       const coincideEquipo = !estado.equipo || r.equipo === estado.equipo;
       const coincideCarne = !estado.carne || r.carne === estado.carne;
       return coincideEquipo && coincideCarne;
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!btn) return;
     estado.equipo = btn.dataset.value;
     activarChip("equipo", estado.equipo);
-    renderTarjetas();
+    renderTarjetas().catch(mostrarError);
   });
 
   document.getElementById("filtro-carne").addEventListener("click", (e) => {
@@ -77,10 +77,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!btn) return;
     estado.carne = btn.dataset.value;
     activarChip("carne", estado.carne);
-    renderTarjetas();
+    renderTarjetas().catch(mostrarError);
   });
 
   activarChip("equipo", estado.equipo);
   activarChip("carne", estado.carne);
-  renderTarjetas();
+  function mostrarError(error) {
+    console.error("Error cargando recetas:", error);
+    grid.innerHTML = '<p class="text-ash">No se pudieron cargar las recetas. Revisa la conexión con Supabase.</p>';
+    contador.textContent = "";
+  }
+
+  renderTarjetas().catch(mostrarError);
 });

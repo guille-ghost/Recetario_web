@@ -460,88 +460,115 @@ const RECETAS_BASE = [
    Las recetas creadas desde admin.html se guardan bajo esta
    clave y se combinan en tiempo real con RECETAS_BASE.
    ---------------------------------------------------------- */
-const LS_KEY_RECETAS = "portal_gastronomico_recetas_usuario";
-const LS_KEY_RECETAS_OCULTAS = "portal_gastronomico_recetas_ocultas";
 const LS_KEY_CATALOGO = "portal_gastronomico_catalogo_usuario";
 const LS_KEY_CATALOGO_OCULTAS = "portal_gastronomico_catalogo_ocultas";
 const LS_KEY_BAR = "portal_gastronomico_bar_usuario";
 const LS_KEY_BAR_OCULTAS = "portal_gastronomico_bar_ocultas";
 
 const DataManager = {
-  /** Devuelve solo las recetas guardadas por el usuario en localStorage */
-  getRecetasUsuario() {
-    try {
-      const raw = localStorage.getItem(LS_KEY_RECETAS);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      console.error("Error leyendo recetas de localStorage:", e);
-      return [];
+  clienteSupabase() {
+    if (!window.supabaseClient) throw new Error("Configura las credenciales de Supabase en js/supabase-client.js.");
+    return window.supabaseClient;
+  },
+
+  recetaDesdeFila(row) {
+    return {
+      slug: row.slug, titulo: row.titulo, descripcion: row.descripcion, carne: row.carne,
+      equipo: row.equipo, imagen: row.imagen, tiempoPrep: row.tiempo_prep,
+      tiempoCoccion: row.tiempo_coccion, porciones: row.porciones,
+      ingredientes: row.ingredientes || [], pasos: row.pasos || [],
+      maridajeSalsas: row.maridaje_salsas || [], maridajeEnsaladas: row.maridaje_ensaladas || [],
+      maridajeBebidas: row.maridaje_bebidas || [], fecha: row.fecha,
+      es_personalizada: row.es_personalizada, eliminada: row.eliminada
+    };
+  },
+
+  recetaAFila(receta, flags = {}) {
+    return {
+      slug: receta.slug, titulo: receta.titulo, descripcion: receta.descripcion,
+      carne: receta.carne, equipo: receta.equipo, imagen: receta.imagen,
+      tiempo_prep: receta.tiempoPrep, tiempo_coccion: receta.tiempoCoccion,
+      porciones: receta.porciones, ingredientes: receta.ingredientes || [], pasos: receta.pasos || [],
+      maridaje_salsas: receta.maridajeSalsas || [], maridaje_ensaladas: receta.maridajeEnsaladas || [],
+      maridaje_bebidas: receta.maridajeBebidas || [], fecha: receta.fecha || new Date().toISOString().slice(0, 10),
+      es_personalizada: flags.es_personalizada ?? true, eliminada: flags.eliminada ?? false
+    };
+  },
+
+  async getRecetasUsuario() {
+    const { data, error } = await this.clienteSupabase().from("recetas")
+      .select("*").eq("es_personalizada", true).eq("eliminada", false).order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data || []).map((row) => this.recetaDesdeFila(row));
+  },
+
+  async getRecetasOcultas() {
+    const { data, error } = await this.clienteSupabase().from("recetas").select("slug").eq("eliminada", true);
+    if (error) throw error;
+    return (data || []).map((row) => row.slug);
+  },
+
+  async reemplazarRecetas(recetas, slugsOcultos = []) {
+    const client = this.clienteSupabase();
+    const { error: borrarError } = await client.from("recetas").delete().eq("es_personalizada", true);
+    if (borrarError) throw borrarError;
+    const { error: tombstonesError } = await client.from("recetas").delete().eq("eliminada", true);
+    if (tombstonesError) throw tombstonesError;
+    if (recetas.length) {
+      const { error } = await client.from("recetas").upsert(recetas.map((r) => this.recetaAFila(r)), { onConflict: "slug" });
+      if (error) throw error;
+    }
+    const tombstones = slugsOcultos
+      .map((slug) => RECETAS_BASE.find((r) => r.slug === slug))
+      .filter(Boolean)
+      .map((receta) => this.recetaAFila(receta, { es_personalizada: false, eliminada: true }));
+    if (tombstones.length) {
+      const { error } = await client.from("recetas").upsert(tombstones, { onConflict: "slug" });
+      if (error) throw error;
     }
   },
 
-  /** Slugs de recetas base que el usuario eliminó desde el panel de administración */
-  getRecetasOcultas() {
-    try {
-      const raw = localStorage.getItem(LS_KEY_RECETAS_OCULTAS);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
-  },
-
-  /** Devuelve TODAS las recetas visibles: base + usuario, sin duplicar slugs, sin las ocultas */
-  getRecetas() {
-    const usuario = this.getRecetasUsuario();
-    const ocultas = new Set(this.getRecetasOcultas());
+  async getRecetas() {
+    const { data, error } = await this.clienteSupabase().from("recetas").select("*");
+    if (error) throw error;
+    const filas = (data || []).map((row) => this.recetaDesdeFila(row));
+    const ocultas = new Set(filas.filter((r) => r.eliminada).map((r) => r.slug));
+    const usuario = filas.filter((r) => r.es_personalizada && !r.eliminada);
     const slugsUsuario = new Set(usuario.map((r) => r.slug));
     const base = RECETAS_BASE.filter((r) => !slugsUsuario.has(r.slug) && !ocultas.has(r.slug));
-    const usuarioVisible = usuario.filter((r) => !ocultas.has(r.slug));
-    // Las recetas de usuario se muestran primero (más recientes)
-    return [...usuarioVisible, ...base];
+    return [...usuario, ...base];
   },
 
-  /** Indica si una receta viene de las recetas base (de fábrica) del sitio */
   esRecetaBase(slug) {
     return RECETAS_BASE.some((r) => r.slug === slug);
   },
 
-  /** Busca una receta por su slug en el conjunto combinado */
-  getRecetaBySlug(slug) {
-    return this.getRecetas().find((r) => r.slug === slug) || null;
+  async getRecetaBySlug(slug) {
+    return (await this.getRecetas()).find((r) => r.slug === slug) || null;
   },
 
-  /** Guarda una receta nueva (o actualiza si el slug ya existe) en localStorage */
-  guardarReceta(receta) {
-    const usuario = this.getRecetasUsuario();
-    const idx = usuario.findIndex((r) => r.slug === receta.slug);
-    if (idx >= 0) {
-      usuario[idx] = receta;
-    } else {
-      usuario.unshift(receta);
-    }
-    localStorage.setItem(LS_KEY_RECETAS, JSON.stringify(usuario));
-
-    // Si se estaba editando una receta base que había sido ocultada, se reactiva
-    const ocultas = this.getRecetasOcultas().filter((s) => s !== receta.slug);
-    localStorage.setItem(LS_KEY_RECETAS_OCULTAS, JSON.stringify(ocultas));
-
+  async guardarReceta(receta) {
+    const { error } = await this.clienteSupabase().from("recetas")
+      .upsert(this.recetaAFila(receta), { onConflict: "slug" });
+    if (error) throw error;
     return receta;
   },
 
-  /** Elimina una receta por slug: quita la versión de usuario (si existe) y oculta la base (si aplica) */
-  eliminarReceta(slug) {
-    const usuario = this.getRecetasUsuario().filter((r) => r.slug !== slug);
-    localStorage.setItem(LS_KEY_RECETAS, JSON.stringify(usuario));
-
+  async eliminarReceta(slug) {
+    const client = this.clienteSupabase();
     if (this.esRecetaBase(slug)) {
-      const ocultas = this.getRecetasOcultas();
-      if (!ocultas.includes(slug)) {
-        ocultas.push(slug);
-        localStorage.setItem(LS_KEY_RECETAS_OCULTAS, JSON.stringify(ocultas));
-      }
+      const recetaBase = RECETAS_BASE.find((r) => r.slug === slug);
+      const recetaActual = await this.getRecetaBySlug(slug);
+      const { error } = await client.from("recetas").upsert(
+        this.recetaAFila({ ...recetaBase, ...recetaActual }, { es_personalizada: false, eliminada: true }),
+        { onConflict: "slug" }
+      );
+      if (error) throw error;
+    } else {
+      const { error } = await client.from("recetas").delete().eq("slug", slug);
+      if (error) throw error;
     }
   },
-
   /** Genera un slug URL-friendly a partir de un título */
   generarSlug(texto) {
     return texto

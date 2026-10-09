@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
   btnCancelarEdicionReceta.addEventListener("click", salirModoEdicionReceta);
 
-  formReceta.addEventListener("submit", (e) => {
+  formReceta.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const titulo = tituloInput.value.trim();
@@ -220,7 +220,13 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       fecha: new Date().toISOString().slice(0, 10)
     };
 
-    DataManager.guardarReceta(receta);
+    try {
+      await DataManager.guardarReceta(receta);
+    } catch (error) {
+      console.error("Error guardando receta en Supabase:", error);
+      mostrarMensaje(`No se pudo guardar en Supabase: ${error.message}`, true);
+      return;
+    }
     mostrarMensaje(
       editandoSlug
         ? `Receta "${receta.titulo}" actualizada correctamente.`
@@ -231,8 +237,15 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     renderGuardadas();
   });
 
-  function renderGuardadas() {
-    const todas = DataManager.getRecetas();
+  async function renderGuardadas() {
+    let todas, recetasUsuario;
+    try {
+      [todas, recetasUsuario] = await Promise.all([DataManager.getRecetas(), DataManager.getRecetasUsuario()]);
+    } catch (error) {
+      console.error("Error consultando recetas en Supabase:", error);
+      listaGuardadas.innerHTML = '<p class="text-sm text-ash">No se pudieron cargar las recetas desde Supabase.</p>';
+      return;
+    }
     listaGuardadas.innerHTML = "";
 
     if (todas.length === 0) {
@@ -242,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
     todas.forEach((r) => {
       const esBase = DataManager.esRecetaBase(r.slug);
-      const fueEditada = esBase && DataManager.getRecetasUsuario().some((u) => u.slug === r.slug);
+      const fueEditada = esBase && recetasUsuario.some((u) => u.slug === r.slug);
       const fila = document.createElement("div");
       fila.className = "flex items-center justify-between bg-smoke/90 border border-ash/20 rounded-lg px-4 py-3";
       fila.innerHTML = `
@@ -265,16 +278,16 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     });
 
     document.querySelectorAll(".btn-editar-receta").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const receta = DataManager.getRecetaBySlug(btn.dataset.slug);
+      btn.addEventListener("click", async () => {
+        const receta = await DataManager.getRecetaBySlug(btn.dataset.slug);
         if (receta) entrarModoEdicionReceta(receta);
       });
     });
 
     document.querySelectorAll(".btn-eliminar-receta").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         if (confirm("¿Eliminar esta receta? Esta acción no se puede deshacer.")) {
-          DataManager.eliminarReceta(btn.dataset.slug);
+          await DataManager.eliminarReceta(btn.dataset.slug);
           if (editandoSlugInput.value === btn.dataset.slug) salirModoEdicionReceta();
           renderGuardadas();
         }
@@ -568,20 +581,21 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const inputImportar = document.getElementById("input-importar");
   const btnGenerarCodigo = document.getElementById("btn-generar-codigo");
 
-  function refrescarTodo() {
+  async function refrescarTodo() {
     llenarMultiselectsMaridaje();
-    renderGuardadas();
+    await renderGuardadas();
     renderCatalogoGuardados();
     renderBarGuardados();
   }
 
   /* ---- Exportar: descarga un .json con todo lo agregado/editado/eliminado ---- */
-  btnExportar.addEventListener("click", () => {
+  btnExportar.addEventListener("click", async () => {
+    const [recetas, recetasOcultas] = await Promise.all([DataManager.getRecetasUsuario(), DataManager.getRecetasOcultas()]);
     const respaldo = {
       version: 1,
       fecha: new Date().toISOString(),
-      recetas: DataManager.getRecetasUsuario(),
-      recetasOcultas: DataManager.getRecetasOcultas(),
+      recetas,
+      recetasOcultas,
       catalogo: DataManager.getCatalogoUsuario(),
       catalogoOcultas: DataManager.getCatalogoOcultas(),
       bar: DataManager.getBarUsuario(),
@@ -609,7 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     if (!archivo) return;
 
     const lector = new FileReader();
-    lector.onload = () => {
+    lector.onload = async () => {
       try {
         const datos = JSON.parse(lector.result);
 
@@ -618,14 +632,13 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
           return;
         }
 
-        localStorage.setItem(LS_KEY_RECETAS, JSON.stringify(datos.recetas || []));
-        localStorage.setItem(LS_KEY_RECETAS_OCULTAS, JSON.stringify(datos.recetasOcultas || []));
+        await DataManager.reemplazarRecetas(datos.recetas || [], datos.recetasOcultas || []);
         localStorage.setItem(LS_KEY_CATALOGO, JSON.stringify(datos.catalogo || []));
         localStorage.setItem(LS_KEY_CATALOGO_OCULTAS, JSON.stringify(datos.catalogoOcultas || []));
         localStorage.setItem(LS_KEY_BAR, JSON.stringify(datos.bar || []));
         localStorage.setItem(LS_KEY_BAR_OCULTAS, JSON.stringify(datos.barOcultas || []));
 
-        refrescarTodo();
+        await refrescarTodo();
         mostrarMensaje("Respaldo importado correctamente.", false);
       } catch (err) {
         mostrarMensaje("El archivo no es un respaldo válido (JSON incorrecto).", true);
@@ -641,8 +654,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const btnCopiarCodigo = document.getElementById("btn-copiar-codigo");
   const copiadoConfirmacion = document.getElementById("copiado-confirmacion");
 
-  function generarCodigoDataJs() {
-    const recetas = DataManager.getRecetasUsuario();
+  async function generarCodigoDataJs() {
+    const recetas = await DataManager.getRecetasUsuario();
     const catalogo = DataManager.getCatalogoUsuario();
     const bar = DataManager.getBarUsuario();
     const bloques = [];
@@ -671,8 +684,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       : "// Todavía no has agregado ni editado nada desde este navegador.";
   }
 
-  btnGenerarCodigo.addEventListener("click", () => {
-    codigoGenerado.value = generarCodigoDataJs();
+  btnGenerarCodigo.addEventListener("click", async () => {
+    codigoGenerado.value = await generarCodigoDataJs();
     copiadoConfirmacion.classList.add("hidden");
     modalCodigo.classList.remove("hidden");
     document.body.classList.add("overflow-hidden");

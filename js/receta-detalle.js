@@ -6,12 +6,19 @@
    (Salsas / Acompañamientos del catálogo + Bebidas del Bar).
    ============================================================ */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const contenedor = document.getElementById("contenido-receta");
   const params = new URLSearchParams(window.location.search);
   const slug = params.get("slug");
 
-  const receta = slug ? DataManager.getRecetaBySlug(slug) : null;
+  let receta = null;
+  try {
+    receta = slug ? await DataManager.getRecetaBySlug(slug) : null;
+  } catch (error) {
+    console.error("Error cargando la receta:", error);
+    contenedor.innerHTML = '<p class="text-ash">No se pudo conectar con Supabase para cargar esta receta.</p>';
+    return;
+  }
 
   if (!receta) {
     const tpl = document.getElementById("tpl-no-encontrada");

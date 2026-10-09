@@ -96,8 +96,11 @@
   Portal Gastronómico · Sitio 100% estático, funciona con HTML, JS y localStorage
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
 <script src="js/data.js"></script>
 <script>
+  (async () => {
   const equipos = [
     { valor: "caja-china", nombre: "Caja China" },
     { valor: "cilindro", nombre: "Cilindro" },
@@ -112,7 +115,7 @@
     </a>
   `).join("");
 
-  const destacadas = DataManager.getRecetas().slice(0, 3);
+  const destacadas = (await DataManager.getRecetas()).slice(0, 3);
   document.getElementById("grid-destacadas").innerHTML = destacadas.map((r) => `
     <a href="receta.html?slug=${r.slug}" class="group block bg-smoke/90 border border-ember/20 rounded-xl overflow-hidden hover:border-ember hover:shadow-lava-glow hover:-translate-y-1 transition duration-300">
       <div class="h-44 overflow-hidden">
@@ -125,6 +128,10 @@
       </div>
     </a>
   `).join("");
+  })().catch((error) => {
+    console.error("No se pudieron cargar las recetas desde Supabase:", error);
+    document.getElementById("grid-destacadas").innerHTML = '<p class="text-ash">No fue posible cargar las recetas. Revisa la conexión con Supabase.</p>';
+  });
 </script>
 <script>
 (() => {
