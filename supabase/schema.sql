@@ -28,11 +28,18 @@ grant insert, update, delete on public.recetas to authenticated;
 create policy "Las recetas son visibles" on public.recetas
   for select to anon, authenticated using (true);
 
-create policy "Usuarios autenticados crean recetas" on public.recetas
-  for insert to authenticated with check (true);
+-- Sustituye REEMPLAZA_CON_CORREO_ADMIN por el correo del administrador
+-- de Supabase Auth antes de ejecutar estas políticas.
+create policy "Solo el admin crea recetas" on public.recetas
+  for insert to authenticated with check (
+    (select auth.jwt() ->> 'email') = lower('REEMPLAZA_CON_CORREO_ADMIN')
+  );
 
-create policy "Usuarios autenticados actualizan recetas" on public.recetas
-  for update to authenticated using (true) with check (true);
+create policy "Solo el admin actualiza recetas" on public.recetas
+  for update to authenticated
+  using ((select auth.jwt() ->> 'email') = lower('REEMPLAZA_CON_CORREO_ADMIN'))
+  with check ((select auth.jwt() ->> 'email') = lower('REEMPLAZA_CON_CORREO_ADMIN'));
 
-create policy "Usuarios autenticados eliminan recetas" on public.recetas
-  for delete to authenticated using (true);
+create policy "Solo el admin elimina recetas" on public.recetas
+  for delete to authenticated
+  using ((select auth.jwt() ->> 'email') = lower('REEMPLAZA_CON_CORREO_ADMIN'));

@@ -36,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
           credentials: "include",
           body: JSON.stringify({ action: "logout" })
         });
+        if (window.supabaseClient) await window.supabaseClient.auth.signOut();
         window.location.replace("/admin");
       });
     }

@@ -23,36 +23,44 @@
       <h1 class="font-display text-4xl mb-3">Panel de contenido</h1>
       <p class="text-ash text-sm mb-7">Solo el administrador autorizado puede editar recetas, salsas y bebidas.</p>
       <form id="login-form">
-        <label class="block text-sm font-medium mb-2" for="admin-password">Contraseña</label>
+        <label class="block text-sm font-medium mb-2" for="admin-email">Correo</label>
+        <input id="admin-email" type="email" autocomplete="username" required class="w-full rounded-lg border border-ash/40 bg-smoke px-3 py-3 text-gray-100 focus:outline-none focus:ring-2 focus:ring-gold">
+        <label class="block text-sm font-medium mb-2 mt-4" for="admin-password">Contraseña</label>
         <input id="admin-password" type="password" autocomplete="current-password" required class="w-full rounded-lg border border-ash/40 bg-smoke px-3 py-3 text-gray-100 focus:outline-none focus:ring-2 focus:ring-gold">
         <button type="submit" class="mt-4 w-full bg-gradient-to-r from-ember to-lava hover:shadow-ember-glow px-5 py-3 rounded-lg font-semibold transition">Entrar al panel</button>
         <p id="login-message" role="alert" class="text-sm mt-3"></p>
       </form>
     </section>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
   <script>
     document.getElementById("login-form").addEventListener("submit", async (event) => {
       event.preventDefault();
+      const email = document.getElementById("admin-email").value.trim();
       const password = document.getElementById("admin-password").value;
       const message = document.getElementById("login-message");
       message.textContent = "Comprobando...";
       try {
+        if (!window.supabaseClient) throw new Error("La conexión con Supabase no está configurada.");
+        const { data: authData, error: authError } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+        if (authError) throw authError;
+
         const response = await fetch("/api/admin", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Basic ${btoa(`:${password}`)}`
-          },
-          credentials: "include"
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ access_token: authData.session.access_token })
         });
         const data = await response.json();
         if (!response.ok || !data.authenticated) {
-          message.textContent = data.error || "La contraseña no es correcta o el servicio no está disponible.";
+          await window.supabaseClient.auth.signOut();
+          message.textContent = data.error || "Esta cuenta no está autorizada para administrar el sitio.";
           return;
         }
         window.location.href = "/admin-panel";
       } catch (error) {
-        message.textContent = "No se pudo conectar al servidor.";
+        message.textContent = error.message || "No se pudo iniciar sesión.";
       }
     });
   </script>

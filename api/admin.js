@@ -2,8 +2,10 @@ const crypto = require("crypto");
 
 const COOKIE_NAME = "fuego_admin_session";
 const COOKIE_MAX_AGE = 60 * 60 * 8;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_SESSION_SECRET = process.env.ADMIN_SESSION_SECRET;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_API_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+const SUPABASE_ADMIN_EMAIL = (process.env.SUPABASE_ADMIN_EMAIL || "").trim().toLowerCase();
 
 function sendJson(response, statusCode, body) {
   response.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -19,101 +21,41 @@ function parseCookies(request) {
     .reduce((cookies, part) => {
       const separator = part.indexOf("=");
       if (separator === -1) return cookies;
-      const key = decodeURIComponent(part.slice(0, separator));
-      const value = decodeURIComponent(part.slice(separator + 1));
-      cookies[key] = value;
+      cookies[decodeURIComponent(part.slice(0, separator))] = decodeURIComponent(part.slice(separator + 1));
       return cookies;
     }, {});
 }
 
-function base64UrlEncode(value) {
-  return Buffer.from(value).toString("base64url");
-}
-
-function base64UrlDecode(value) {
-  return Buffer.from(value, "base64url").toString("utf8");
-}
-
 function signToken(payload) {
-  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
-  const signature = crypto
-    .createHmac("sha256", ADMIN_SESSION_SECRET)
-    .update(encodedPayload)
-    .digest("base64url");
-  return `${encodedPayload}.${signature}`;
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = crypto.createHmac("sha256", ADMIN_SESSION_SECRET).update(encoded).digest("base64url");
+  return `${encoded}.${signature}`;
 }
 
 function verifyToken(token) {
   if (!token || !ADMIN_SESSION_SECRET) return null;
-
   const separator = token.lastIndexOf(".");
-  if (separator === -1) return null;
-
-  const encodedPayload = token.slice(0, separator);
-  const providedSignature = token.slice(separator + 1);
-  const expectedSignature = crypto
-    .createHmac("sha256", ADMIN_SESSION_SECRET)
-    .update(encodedPayload)
-    .digest("base64url");
-
-  const expectedBuffer = Buffer.from(expectedSignature, "base64url");
-  const providedBuffer = Buffer.from(providedSignature, "base64url");
-  if (
-    expectedBuffer.length !== providedBuffer.length ||
-    !crypto.timingSafeEqual(expectedBuffer, providedBuffer)
-  ) {
-    return null;
-  }
-
+  if (separator < 0) return null;
+  const encoded = token.slice(0, separator);
+  const signature = token.slice(separator + 1);
+  const expected = crypto.createHmac("sha256", ADMIN_SESSION_SECRET).update(encoded).digest("base64url");
+  const expectedBytes = Buffer.from(expected, "base64url");
+  const signatureBytes = Buffer.from(signature, "base64url");
+  if (expectedBytes.length !== signatureBytes.length || !crypto.timingSafeEqual(expectedBytes, signatureBytes)) return null;
   try {
-    const payload = JSON.parse(base64UrlDecode(encodedPayload));
-    if (payload.exp <= Math.floor(Date.now() / 1000)) return null;
-    return payload;
-  } catch (error) {
-    return null;
-  }
-}
-
-function getSession(request) {
-  const token = parseCookies(request)[COOKIE_NAME];
-  return verifyToken(token);
-}
-
-function getPasswordFromRequest(request) {
-  const authorization = request.headers.authorization || "";
-  if (!authorization.toLowerCase().startsWith("basic ")) return null;
-
-  try {
-    const decoded = Buffer.from(authorization.slice(6).trim(), "base64").toString("utf8");
-    const separator = decoded.indexOf(":");
-    return separator === -1 ? null : decoded.slice(separator + 1);
-  } catch (error) {
+    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
+    return payload.exp > Math.floor(Date.now() / 1000) ? payload : null;
+  } catch {
     return null;
   }
 }
 
 async function readJsonBody(request) {
-  const rawBody = request.body;
-  if (rawBody == null) return {};
+  if (request.body == null) return {};
   if (typeof request.json === "function") return request.json();
-  if (typeof rawBody === "string") return JSON.parse(rawBody);
-  if (Buffer.isBuffer(rawBody)) {
-    return rawBody.length ? JSON.parse(rawBody.toString("utf8")) : {};
-  }
-  if (
-    typeof rawBody === "object" &&
-    !Symbol.asyncIterator in rawBody &&
-    !Symbol.iterator in rawBody
-  ) {
-    return rawBody;
-  }
-
-  const chunks = [];
-  for await (const chunk of rawBody) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-  const body = Buffer.concat(chunks).toString("utf8");
-  return body ? JSON.parse(body) : {};
+  if (typeof request.body === "string") return JSON.parse(request.body);
+  if (Buffer.isBuffer(request.body)) return request.body.length ? JSON.parse(request.body.toString("utf8")) : {};
+  return request.body;
 }
 
 function secureCookie(value, maxAge = COOKIE_MAX_AGE) {
@@ -121,59 +63,54 @@ function secureCookie(value, maxAge = COOKIE_MAX_AGE) {
   return `${COOKIE_NAME}=${encodeURIComponent(value)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${maxAge}${secure}`;
 }
 
-function isCorrectPassword(password) {
-  if (!ADMIN_PASSWORD || !password) return false;
-  const expected = Buffer.from(String(ADMIN_PASSWORD));
-  const provided = Buffer.from(String(password));
-  return (
-    expected.length === provided.length &&
-    crypto.timingSafeEqual(expected, provided)
-  );
+async function getAuthorizedUser(accessToken) {
+  if (!accessToken) return null;
+  const result = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { apikey: SUPABASE_API_KEY, Authorization: `Bearer ${accessToken}` }
+  });
+  if (!result.ok) return null;
+  const user = await result.json();
+  return (user.email || "").trim().toLowerCase() === SUPABASE_ADMIN_EMAIL ? user : null;
 }
 
 module.exports = async function handler(request, response) {
-  if (!ADMIN_PASSWORD || !ADMIN_SESSION_SECRET) {
-    sendJson(response, 503, { error: "Configuración administrativa incompleta." });
+  if (!ADMIN_SESSION_SECRET || !SUPABASE_URL || !SUPABASE_API_KEY || !SUPABASE_ADMIN_EMAIL) {
+    sendJson(response, 503, { error: "Falta configurar la autenticación de Supabase en el servidor." });
     return;
   }
 
   const method = request.method || "GET";
-
   if (method === "GET") {
-    const session = getSession(request);
-    if (!session) {
-      sendJson(response, 401, { authenticated: false });
-      return;
-    }
-    sendJson(response, 200, { authenticated: true });
+    const session = verifyToken(parseCookies(request)[COOKIE_NAME]);
+    sendJson(response, session ? 200 : 401, { authenticated: Boolean(session) });
     return;
   }
 
   if (method === "POST") {
     try {
-      const passwordFromHeader = getPasswordFromRequest(request);
-      const body = passwordFromHeader == null ? await readJsonBody(request) : {};
-
+      const body = await readJsonBody(request);
       if (body.action === "logout") {
         response.setHeader("Set-Cookie", secureCookie("", 0));
         sendJson(response, 200, { authenticated: false });
         return;
       }
 
-      const password = passwordFromHeader ?? body.password;
-      if (!isCorrectPassword(password)) {
-        sendJson(response, 401, { error: "Credenciales inválidas." });
+      const user = await getAuthorizedUser(body.access_token);
+      if (!user) {
+        sendJson(response, 401, { error: "La cuenta no está autorizada para administrar el sitio." });
         return;
       }
 
       const token = signToken({
-        sub: "administrator",
+        sub: user.id,
+        email: user.email,
         exp: Math.floor(Date.now() / 1000) + COOKIE_MAX_AGE
       });
       response.setHeader("Set-Cookie", secureCookie(token));
       sendJson(response, 200, { authenticated: true });
     } catch (error) {
-      sendJson(response, 400, { error: "La petición no es válida." });
+      console.error("Error de autenticación del administrador:", error);
+      sendJson(response, 400, { error: "No se pudo completar el inicio de sesión." });
     }
     return;
   }
