@@ -12,11 +12,11 @@
     theme: {
       extend: {
         colors: {
-          charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF4500", lava: "#D92600",
-          gold: "#E6A100", parchment: "#F3F0EC", ash: "#A0988E"
+          charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF6A00", lava: "#D92600",
+          gold: "#FFB000", sulfur: "#FFB000", parchment: "#F3F0EC", ash: "#A0988E"
         },
         fontFamily: { display: ["Cinzel Decorative", "serif"], body: ["Inter", "sans-serif"] },
-        boxShadow: { 'ember-glow': '0 0 25px -5px rgba(255, 69, 0, 0.5)', 'lava-glow': '0 0 35px -5px rgba(217, 38, 0, 0.6)' }
+        boxShadow: { 'ember-glow': '0 0 25px -5px rgba(255, 106, 0, 0.5)', 'lava-glow': '0 0 35px -5px rgba(217, 38, 0, 0.6)' }
       }
     }
   };
@@ -24,10 +24,11 @@
 <link rel="stylesheet" href="css/custom.css" />
 </head>
 <body class="bg-charcoal text-gray-100 font-body">
+<canvas id="canvas-brasas" data-scope="viewport" aria-hidden="true" class="canvas-brasas-fondo"></canvas>
 
-<header class="bg-charcoal text-gray-100 sticky top-0 z-50 border-b border-ember/40">
+<header class="site-header bg-charcoal/95 text-gray-100 sticky top-0 z-50 border-b border-ember/40 backdrop-blur">
   <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="index.html" class="font-display text-2xl tracking-tight">El Festin&nbsp; de Belcebu</a>
+    <a href="index.html" class="brand-fire font-display text-lg sm:text-2xl md:text-3xl tracking-tight">El Festín de Belcebú</a>
     <nav class="hidden sm:flex gap-6 text-sm text-ash">
       <a href="index.html" class="hover:text-gold transition">Inicio</a>
       <a href="recetario.html" class="hover:text-gold transition">Recetario</a>
@@ -160,5 +161,6 @@
 
   pintar("");
 </script>
+<script src="js/brasas.js"></script>
 </body>
 </html>

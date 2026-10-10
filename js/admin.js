@@ -69,12 +69,12 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   function mostrarMensaje(texto, esError) {
     mensajeExito.textContent = texto;
     mensajeExito.classList.remove("hidden");
-    mensajeExito.classList.toggle("border-green-600", !esError);
-    mensajeExito.classList.toggle("bg-green-50", !esError);
-    mensajeExito.classList.toggle("text-green-800", !esError);
-    mensajeExito.classList.toggle("border-red-600", esError);
-    mensajeExito.classList.toggle("bg-red-50", esError);
-    mensajeExito.classList.toggle("text-red-800", esError);
+    mensajeExito.classList.toggle("border-green-500/60", !esError);
+    mensajeExito.classList.toggle("bg-green-950/50", !esError);
+    mensajeExito.classList.toggle("text-green-300", !esError);
+    mensajeExito.classList.toggle("border-red-500/60", esError);
+    mensajeExito.classList.toggle("bg-red-950/50", esError);
+    mensajeExito.classList.toggle("text-red-300", esError);
     mensajeExito.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -272,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         <div class="flex gap-3 text-sm">
           <a href="receta.html?slug=${r.slug}" class="text-ash hover:text-ember transition">Ver</a>
           <button data-slug="${r.slug}" class="btn-editar-receta text-ember hover:underline">Editar</button>
-          <button data-slug="${r.slug}" class="btn-eliminar-receta text-red-700 hover:underline">Eliminar</button>
+          <button data-slug="${r.slug}" class="btn-eliminar-receta text-red-400 hover:text-red-300 hover:underline">Eliminar</button>
         </div>
       `;
       listaGuardadas.appendChild(fila);
@@ -410,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         <div class="flex gap-3 text-sm">
           <a href="catalogo.html" class="text-ash hover:text-ember transition">Ver</a>
           <button data-slug="${i.slug}" class="btn-editar-catalogo text-ember hover:underline">Editar</button>
-          <button data-slug="${i.slug}" class="btn-eliminar-catalogo text-red-700 hover:underline">Eliminar</button>
+          <button data-slug="${i.slug}" class="btn-eliminar-catalogo text-red-400 hover:text-red-300 hover:underline">Eliminar</button>
         </div>
       `;
       listaCatalogoGuardados.appendChild(fila);
@@ -549,7 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         <div class="flex gap-3 text-sm">
           <a href="bar.html" class="text-ash hover:text-ember transition">Ver</a>
           <button data-slug="${i.slug}" class="btn-editar-bar text-ember hover:underline">Editar</button>
-          <button data-slug="${i.slug}" class="btn-eliminar-bar text-red-700 hover:underline">Eliminar</button>
+          <button data-slug="${i.slug}" class="btn-eliminar-bar text-red-400 hover:text-red-300 hover:underline">Eliminar</button>
         </div>
       `;
       listaBarGuardados.appendChild(fila);

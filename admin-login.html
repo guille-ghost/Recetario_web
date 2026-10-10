@@ -9,14 +9,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>
     tailwind.config = { theme: { extend: {
-      colors: { charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF4500", lava: "#D92600", gold: "#E6A100", parchment: "#F3F0EC", ash: "#A0988E" },
+      colors: { charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF6A00", lava: "#D92600", gold: "#FFB000", sulfur: "#FFB000", parchment: "#F3F0EC", ash: "#A0988E" },
       fontFamily: { display: ["Cinzel Decorative", "serif"], body: ["Inter", "sans-serif"] },
-      boxShadow: { 'ember-glow': '0 0 25px -5px rgba(255, 69, 0, 0.5)', 'lava-glow': '0 0 35px -5px rgba(217, 38, 0, 0.6)' }
+      boxShadow: { 'ember-glow': '0 0 25px -5px rgba(255, 106, 0, 0.5)', 'lava-glow': '0 0 35px -5px rgba(217, 38, 0, 0.6)' }
     } };
   </script>
   <link rel="stylesheet" href="css/custom.css">
 </head>
 <body class="bg-charcoal text-gray-100 font-body">
+  <canvas id="canvas-brasas" data-scope="viewport" aria-hidden="true" class="canvas-brasas-fondo"></canvas>
   <main class="min-h-screen flex items-center justify-center px-6 py-16">
     <section class="w-full max-w-md bg-charcoal rounded-2xl p-8 text-gray-100 shadow-xl">
       <p class="text-gold font-semibold tracking-widest text-xs uppercase mb-3">Acceso privado</p>
@@ -56,5 +57,6 @@
       }
     });
   </script>
+  <script src="js/brasas.js"></script>
 </body>
 </html>

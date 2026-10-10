@@ -12,12 +12,12 @@
     theme: {
       extend: {
         colors: {
-          charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF4500",
-          lava: "#D92600", gold: "#E6A100", ash: "#A0988E"
+          charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF6A00",
+          lava: "#D92600", gold: "#FFB000", sulfur: "#FFB000", ash: "#A0988E"
         },
         fontFamily: { display: ["Cinzel Decorative", "serif"], body: ["Inter", "sans-serif"] },
         boxShadow: {
-          'ember-glow': '0 0 25px -5px rgba(255, 69, 0, 0.5)',
+          'ember-glow': '0 0 25px -5px rgba(255, 106, 0, 0.5)',
           'lava-glow': '0 0 35px -5px rgba(217, 38, 0, 0.6)'
         }
       }
@@ -28,9 +28,9 @@
 </head>
 <body class="bg-charcoal text-gray-100 font-body">
 
-<header class="bg-charcoal/95 text-gray-100 sticky top-0 z-50 border-b border-ember/40 backdrop-blur">
+<header class="site-header bg-charcoal/95 text-gray-100 sticky top-0 z-50 border-b border-ember/40 backdrop-blur">
   <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="index.html" class="font-display text-xl md:text-2xl tracking-tight">El Festín de Belcebú</a>
+    <a href="index.html" class="brand-fire font-display text-lg sm:text-2xl md:text-3xl tracking-tight">El Festín de Belcebú</a>
     <nav class="hidden sm:flex gap-6 text-sm text-ash">
       <a href="index.html" class="text-gold">Inicio</a>
       <a href="recetario.html" class="hover:text-gold transition">Recetario</a>
@@ -48,7 +48,7 @@
     <div>
       <p class="text-gold font-semibold tracking-widest text-xs uppercase mb-4">Caja China · Cilindro · Parrilla · Horno de Barro</p>
       <h1 class="font-display text-5xl md:text-6xl leading-tight mb-6">El fuego cuenta<br/>su propia receta.</h1>
-      <p class="text-ash text-lg mb-8 max-w-md">Un recetario parrillero redactado con calma: elige tu equipo, tu carne, y encuentra la técnica exacta con su maridaje ideal.</p>
+      <p class="text-ash text-lg mb-8 max-w-md">Un recetario a al fuego redactado con calma: elige tu equipo, tu carne, y encuentra la técnica exacta para tu plato ideal.</p>
       <div class="flex gap-4">
         <a href="recetario.html" class="bg-gradient-to-r from-ember to-lava px-6 py-3 rounded-lg font-semibold shadow-lg transition duration-300 hover:shadow-ember-glow hover:-translate-y-0.5">Explorar recetario</a>
       </div>
@@ -134,41 +134,6 @@
     document.getElementById("grid-destacadas").innerHTML = '<p class="text-ash">No fue posible cargar las recetas. Revisa la conexión con Supabase.</p>';
   });
 </script>
-<script>
-(() => {
-  const canvas = document.getElementById('canvas-brasas');
-  const hero = document.getElementById('hero');
-  const ctx = canvas.getContext('2d');
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let width = 0, height = 0, particles = [], frame = 0;
-  const makeParticle = (initial = false) => ({
-    x: Math.random() * width, y: initial ? Math.random() * height : height + Math.random() * 24,
-    radius: Math.random() * 2 + 0.6, speed: Math.random() * 0.8 + 0.35,
-    drift: (Math.random() - 0.5) * 0.65, alpha: Math.random() * 0.65 + 0.25,
-    color: Math.random() > 0.55 ? '#FF4500' : '#E6A100'
-  });
-  const resize = () => {
-    const rect = hero.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
-    width = rect.width; height = rect.height;
-    canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    particles = Array.from({ length: Math.min(75, Math.floor(width / 16)) }, () => makeParticle(true));
-  };
-  const draw = () => {
-    ctx.clearRect(0, 0, width, height);
-    particles.forEach((p) => {
-      p.y -= p.speed; p.x += p.drift + Math.sin((p.y + frame) * 0.012) * 0.25;
-      if (p.y < -8) Object.assign(p, makeParticle());
-      ctx.globalAlpha = p.alpha * Math.min(1, (height - p.y) / 60);
-      ctx.fillStyle = p.color; ctx.shadowBlur = 12; ctx.shadowColor = p.color;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
-    });
-    ctx.globalAlpha = 1; ctx.shadowBlur = 0; frame++;
-    if (!reduceMotion) requestAnimationFrame(draw);
-  };
-  resize(); draw();
-  window.addEventListener('resize', resize, { passive: true });
-})();
-</script>
+<script src="js/brasas.js"></script>
 </body>
 </html>
