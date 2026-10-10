@@ -735,14 +735,16 @@ const DataManager = {
     "cilindro": "Cilindro",
     "parrilla": "Parrilla",
     "horno-barro": "Horno de Barro",
-    "cocina-convencional": "Cocina Convencional"
+    "cocina-convencional": "Cocina Convencional",
+    airfryer: "Airfryer"
   },
 
   LABELS_CARNE: {
     res: "Res",
     cerdo: "Cerdo",
     pollo: "Pollo",
-    cordero: "Cordero"
+    cordero: "Cordero",
+    pescado: "Pescado"
   },
 
   LABELS_TIPO_CATALOGO: {
