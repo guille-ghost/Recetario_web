@@ -83,13 +83,22 @@
   Portal Gastronómico · Módulo de Bar
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
 <script src="js/data.js"></script>
 <script>
   const grid = document.getElementById("grid-bar");
   const etiquetas = { coctel: "Coctel", vino: "Vino", cerveza: "Cerveza", "sin-alcohol": "Sin alcohol" };
 
-  function pintar(filtro) {
-    const items = DataManager.getBar().filter((i) => !filtro || i.tipo === filtro);
+  async function pintar(filtro) {
+    let items;
+    try {
+      items = (await DataManager.getBar()).filter((i) => !filtro || i.tipo === filtro);
+    } catch (error) {
+      console.error("Error cargando bebidas desde Supabase:", error);
+      grid.innerHTML = '<p class="text-ash">No se pudieron cargar las bebidas. Revisa la conexión con Supabase.</p>';
+      return;
+    }
     grid.innerHTML = items.map((i) => `
       <div class="bg-smoke/90 border border-ash/20 rounded-xl overflow-hidden flex flex-col">
         <div class="h-40 overflow-hidden">
@@ -108,15 +117,15 @@
     `).join("");
 
     document.querySelectorAll(".btn-ver-preparacion").forEach((btn) => {
-      btn.addEventListener("click", () => abrirModal(btn.dataset.slug));
+      btn.addEventListener("click", async () => abrirModal(btn.dataset.slug));
     });
   }
 
   /* ---- Modal de preparación ---- */
   const modal = document.getElementById("modal-preparacion");
 
-  function abrirModal(slug) {
-    const item = DataManager.getBarBySlug(slug);
+  async function abrirModal(slug) {
+    const item = await DataManager.getBarBySlug(slug);
     if (!item) return;
 
     document.getElementById("modal-tipo").textContent = etiquetas[item.tipo] || item.tipo;

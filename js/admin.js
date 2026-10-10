@@ -189,12 +189,13 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const btnGuardarReceta = document.getElementById("btn-guardar-receta");
   const btnCancelarEdicionReceta = document.getElementById("btn-cancelar-edicion-receta");
 
-  function llenarMultiselectsMaridaje(seleccionadosSalsas = [], seleccionadosEnsaladas = [], seleccionadosBebidas = []) {
+  async function llenarMultiselectsMaridaje(seleccionadosSalsas = [], seleccionadosEnsaladas = [], seleccionadosBebidas = []) {
     selectSalsas.innerHTML = "";
     selectEnsaladas.innerHTML = "";
     selectBebidas.innerHTML = "";
+    const [catalogo, bebidas] = await Promise.all([DataManager.getCatalogo(), DataManager.getBar()]);
 
-    DataManager.getCatalogo()
+    catalogo
       .filter((item) => item.tipo === "salsa" || item.tipo === "acompanamiento")
       .forEach((item) => {
         const opt = document.createElement("option");
@@ -204,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         selectSalsas.appendChild(opt);
       });
 
-    DataManager.getCatalogo()
+    catalogo
       .filter((item) => item.tipo === "ensalada")
       .forEach((item) => {
         const opt = document.createElement("option");
@@ -214,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         selectEnsaladas.appendChild(opt);
       });
 
-    DataManager.getBar().forEach((item) => {
+    bebidas.forEach((item) => {
       const opt = document.createElement("option");
       opt.value = item.slug;
       opt.textContent = item.nombre;
@@ -230,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     slugPreview.textContent = slug ? `receta.html?slug=${slug}` : "";
   });
 
-  function entrarModoEdicionReceta(receta) {
+  async function entrarModoEdicionReceta(receta) {
     editandoSlugInput.value = receta.slug;
     tituloInput.value = receta.titulo;
     document.getElementById("equipo").value = receta.equipo;
@@ -244,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     document.getElementById("ingredientes").value = (receta.ingredientes || []).join("\n");
     document.getElementById("pasos").value = (receta.pasos || []).join("\n");
 
-    llenarMultiselectsMaridaje(receta.maridajeSalsas || [], receta.maridajeEnsaladas || [], receta.maridajeBebidas || []);
+    await llenarMultiselectsMaridaje(receta.maridajeSalsas || [], receta.maridajeEnsaladas || [], receta.maridajeBebidas || []);
 
     slugPreview.textContent = `receta.html?slug=${receta.slug} (fijo mientras editas)`;
     avisoEditandoNombre.textContent = receta.titulo;
@@ -256,14 +257,14 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     formReceta.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function salirModoEdicionReceta() {
+  async function salirModoEdicionReceta() {
     editandoSlugInput.value = "";
     formReceta.reset();
     slugPreview.textContent = "";
     avisoEditando.classList.add("hidden");
     btnGuardarReceta.textContent = "Guardar receta";
     btnCancelarEdicionReceta.classList.add("hidden");
-    llenarMultiselectsMaridaje();
+    await llenarMultiselectsMaridaje();
   }
 
   btnCancelarEdicionReceta.addEventListener("click", salirModoEdicionReceta);
@@ -312,8 +313,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         : `Receta "${receta.titulo}" guardada correctamente. Ya está visible en el recetario.`,
       false
     );
-    salirModoEdicionReceta();
-    renderGuardadas();
+    await salirModoEdicionReceta();
+    await renderGuardadas();
   });
 
   async function renderGuardadas() {
@@ -359,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     document.querySelectorAll(".btn-editar-receta").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const receta = await DataManager.getRecetaBySlug(btn.dataset.slug);
-        if (receta) entrarModoEdicionReceta(receta);
+        if (receta) await entrarModoEdicionReceta(receta);
       });
     });
 
@@ -367,8 +368,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       btn.addEventListener("click", async () => {
         if (confirm("¿Eliminar esta receta? Esta acción no se puede deshacer.")) {
           await DataManager.eliminarReceta(btn.dataset.slug);
-          if (editandoSlugInput.value === btn.dataset.slug) salirModoEdicionReceta();
-          renderGuardadas();
+          if (editandoSlugInput.value === btn.dataset.slug) await salirModoEdicionReceta();
+          await renderGuardadas();
         }
       });
     });
@@ -425,7 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
   btnCancelarEdicionCatalogo.addEventListener("click", salirModoEdicionCatalogo);
 
-  formCatalogo.addEventListener("submit", (e) => {
+  formCatalogo.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const nombre = catNombreInput.value.trim();
@@ -450,7 +451,13 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       pasos: textareaALista(document.getElementById("cat-pasos").value)
     };
 
-    DataManager.guardarCatalogoItem(item);
+    try {
+      await DataManager.guardarCatalogoItem(item);
+    } catch (error) {
+      console.error("Error guardando catálogo en Supabase:", error);
+      mostrarMensaje(`No se pudo guardar en Supabase: ${error.message}`, true);
+      return;
+    }
     mostrarMensaje(
       editandoSlug
         ? `"${item.nombre}" actualizado correctamente.`
@@ -458,12 +465,19 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       false
     );
     salirModoEdicionCatalogo();
-    renderCatalogoGuardados();
-    llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
+    await renderCatalogoGuardados();
+    await llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
   });
 
-  function renderCatalogoGuardados() {
-    const todos = DataManager.getCatalogo();
+  async function renderCatalogoGuardados() {
+    let todos, usuario;
+    try {
+      [todos, usuario] = await Promise.all([DataManager.getCatalogo(), DataManager.getCatalogoUsuario()]);
+    } catch (error) {
+      console.error("Error consultando catálogo en Supabase:", error);
+      listaCatalogoGuardados.innerHTML = '<p class="text-sm text-ash">No se pudo cargar el catálogo desde Supabase.</p>';
+      return;
+    }
     listaCatalogoGuardados.innerHTML = "";
 
     if (todos.length === 0) {
@@ -473,7 +487,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
     todos.forEach((i) => {
       const esBase = DataManager.esCatalogoBase(i.slug);
-      const fueEditada = esBase && DataManager.getCatalogoUsuario().some((u) => u.slug === i.slug);
+      const fueEditada = esBase && usuario.some((u) => u.slug === i.slug);
       const fila = document.createElement("div");
       fila.className = "flex items-center justify-between bg-smoke/90 border border-ash/20 rounded-lg px-4 py-3";
       fila.innerHTML = `
@@ -496,19 +510,24 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     });
 
     document.querySelectorAll(".btn-editar-catalogo").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const item = DataManager.getCatalogoBySlug(btn.dataset.slug);
+      btn.addEventListener("click", async () => {
+        const item = await DataManager.getCatalogoBySlug(btn.dataset.slug);
         if (item) entrarModoEdicionCatalogo(item);
       });
     });
 
     document.querySelectorAll(".btn-eliminar-catalogo").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         if (confirm("¿Eliminar este ítem del catálogo? Esta acción no se puede deshacer.")) {
-          DataManager.eliminarCatalogoItem(btn.dataset.slug);
+          try {
+            await DataManager.eliminarCatalogoItem(btn.dataset.slug);
+          } catch (error) {
+            mostrarMensaje(`No se pudo eliminar en Supabase: ${error.message}`, true);
+            return;
+          }
           if (catEditandoSlugInput.value === btn.dataset.slug) salirModoEdicionCatalogo();
-          renderCatalogoGuardados();
-          llenarMultiselectsMaridaje();
+          await renderCatalogoGuardados();
+          await llenarMultiselectsMaridaje();
         }
       });
     });
@@ -565,7 +584,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
   btnCancelarEdicionBar.addEventListener("click", salirModoEdicionBar);
 
-  formBar.addEventListener("submit", (e) => {
+  formBar.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const nombre = barNombreInput.value.trim();
@@ -590,7 +609,13 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       pasos: textareaALista(document.getElementById("bar-pasos").value)
     };
 
-    DataManager.guardarBarItem(item);
+    try {
+      await DataManager.guardarBarItem(item);
+    } catch (error) {
+      console.error("Error guardando bebidas en Supabase:", error);
+      mostrarMensaje(`No se pudo guardar en Supabase: ${error.message}`, true);
+      return;
+    }
     mostrarMensaje(
       editandoSlug
         ? `"${item.nombre}" actualizado correctamente.`
@@ -598,12 +623,19 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       false
     );
     salirModoEdicionBar();
-    renderBarGuardados();
-    llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
+    await renderBarGuardados();
+    await llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
   });
 
-  function renderBarGuardados() {
-    const todos = DataManager.getBar();
+  async function renderBarGuardados() {
+    let todos, usuario;
+    try {
+      [todos, usuario] = await Promise.all([DataManager.getBar(), DataManager.getBarUsuario()]);
+    } catch (error) {
+      console.error("Error consultando bebidas en Supabase:", error);
+      listaBarGuardados.innerHTML = '<p class="text-sm text-ash">No se pudieron cargar las bebidas desde Supabase.</p>';
+      return;
+    }
     listaBarGuardados.innerHTML = "";
 
     if (todos.length === 0) {
@@ -613,7 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
     todos.forEach((i) => {
       const esBase = DataManager.esBarBase(i.slug);
-      const fueEditada = esBase && DataManager.getBarUsuario().some((u) => u.slug === i.slug);
+      const fueEditada = esBase && usuario.some((u) => u.slug === i.slug);
       const fila = document.createElement("div");
       fila.className = "flex items-center justify-between bg-smoke/90 border border-ash/20 rounded-lg px-4 py-3";
       fila.innerHTML = `
@@ -636,19 +668,24 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     });
 
     document.querySelectorAll(".btn-editar-bar").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const item = DataManager.getBarBySlug(btn.dataset.slug);
+      btn.addEventListener("click", async () => {
+        const item = await DataManager.getBarBySlug(btn.dataset.slug);
         if (item) entrarModoEdicionBar(item);
       });
     });
 
     document.querySelectorAll(".btn-eliminar-bar").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         if (confirm("¿Eliminar esta bebida? Esta acción no se puede deshacer.")) {
-          DataManager.eliminarBarItem(btn.dataset.slug);
+          try {
+            await DataManager.eliminarBarItem(btn.dataset.slug);
+          } catch (error) {
+            mostrarMensaje(`No se pudo eliminar en Supabase: ${error.message}`, true);
+            return;
+          }
           if (barEditandoSlugInput.value === btn.dataset.slug) salirModoEdicionBar();
-          renderBarGuardados();
-          llenarMultiselectsMaridaje();
+          await renderBarGuardados();
+          await llenarMultiselectsMaridaje();
         }
       });
     });
@@ -663,24 +700,28 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const btnGenerarCodigo = document.getElementById("btn-generar-codigo");
 
   async function refrescarTodo() {
-    llenarMultiselectsMaridaje();
+    await llenarMultiselectsMaridaje();
     await renderGuardadas();
-    renderCatalogoGuardados();
-    renderBarGuardados();
+    await renderCatalogoGuardados();
+    await renderBarGuardados();
   }
 
   /* ---- Exportar: descarga un .json con todo lo agregado/editado/eliminado ---- */
   btnExportar.addEventListener("click", async () => {
-    const [recetas, recetasOcultas] = await Promise.all([DataManager.getRecetasUsuario(), DataManager.getRecetasOcultas()]);
+    const [recetas, recetasOcultas, catalogo, catalogoOcultas, bar, barOcultas] = await Promise.all([
+      DataManager.getRecetasUsuario(), DataManager.getRecetasOcultas(),
+      DataManager.getCatalogoUsuario(), DataManager.getCatalogoOcultas(),
+      DataManager.getBarUsuario(), DataManager.getBarOcultas()
+    ]);
     const respaldo = {
       version: 1,
       fecha: new Date().toISOString(),
       recetas,
       recetasOcultas,
-      catalogo: DataManager.getCatalogoUsuario(),
-      catalogoOcultas: DataManager.getCatalogoOcultas(),
-      bar: DataManager.getBarUsuario(),
-      barOcultas: DataManager.getBarOcultas()
+      catalogo,
+      catalogoOcultas,
+      bar,
+      barOcultas
     };
 
     const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: "application/json" });
@@ -708,21 +749,20 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       try {
         const datos = JSON.parse(lector.result);
 
-        if (!confirm("Importar reemplazará las recetas, salsas y bebidas guardadas en este navegador por las del archivo. ¿Continuar?")) {
+        if (!confirm("Importar reemplazará las recetas, salsas y bebidas personalizadas de Supabase por las del archivo. ¿Continuar?")) {
           inputImportar.value = "";
           return;
         }
 
         await DataManager.reemplazarRecetas(datos.recetas || [], datos.recetasOcultas || []);
-        localStorage.setItem(LS_KEY_CATALOGO, JSON.stringify(datos.catalogo || []));
-        localStorage.setItem(LS_KEY_CATALOGO_OCULTAS, JSON.stringify(datos.catalogoOcultas || []));
-        localStorage.setItem(LS_KEY_BAR, JSON.stringify(datos.bar || []));
-        localStorage.setItem(LS_KEY_BAR_OCULTAS, JSON.stringify(datos.barOcultas || []));
+        await DataManager.reemplazarCatalogo(datos.catalogo || [], datos.catalogoOcultas || []);
+        await DataManager.reemplazarBar(datos.bar || [], datos.barOcultas || []);
 
         await refrescarTodo();
         mostrarMensaje("Respaldo importado correctamente.", false);
       } catch (err) {
-        mostrarMensaje("El archivo no es un respaldo válido (JSON incorrecto).", true);
+        console.error("Error importando respaldo:", err);
+        mostrarMensaje(`No se pudo importar el respaldo: ${err.message}`, true);
       }
       inputImportar.value = "";
     };
@@ -737,8 +777,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
   async function generarCodigoDataJs() {
     const recetas = await DataManager.getRecetasUsuario();
-    const catalogo = DataManager.getCatalogoUsuario();
-    const bar = DataManager.getBarUsuario();
+    const [catalogo, bar] = await Promise.all([DataManager.getCatalogoUsuario(), DataManager.getBarUsuario()]);
     const bloques = [];
 
     if (recetas.length) {
@@ -794,8 +833,17 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   });
 
   /* ---- Inicialización ---- */
-  llenarMultiselectsMaridaje();
-  renderGuardadas();
-  renderCatalogoGuardados();
-  renderBarGuardados();
+  (async () => {
+    try {
+      const migrado = await DataManager.migrarCatalogoBarLocal();
+      await llenarMultiselectsMaridaje();
+      await renderGuardadas();
+      await renderCatalogoGuardados();
+      await renderBarGuardados();
+      if (migrado) mostrarMensaje("Las salsas y bebidas guardadas en este navegador ya se migraron a Supabase.", false);
+    } catch (error) {
+      console.error("Error inicializando el panel de contenido:", error);
+      mostrarMensaje(`No se pudo conectar el catálogo y el Bar con Supabase: ${error.message}`, true);
+    }
+  })();
 });

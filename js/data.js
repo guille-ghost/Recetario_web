@@ -729,6 +729,167 @@ const DataManager = {
     }
   },
 
+  /* Métodos Supabase para catálogo y bebidas: estos reemplazan los métodos locales legados. */
+  itemDesdeFila(row) {
+    return {
+      slug: row.slug, nombre: row.nombre, tipo: row.tipo, imagen: row.imagen,
+      descripcion: row.descripcion, porciones: row.porciones, tiempoPrep: row.tiempo_prep,
+      ingredientes: row.ingredientes || [], pasos: row.pasos || [],
+      es_personalizada: row.es_personalizada, eliminada: row.eliminada
+    };
+  },
+
+  itemAFila(item, flags = {}) {
+    return {
+      slug: item.slug, nombre: item.nombre, tipo: item.tipo, imagen: item.imagen || "",
+      descripcion: item.descripcion || "", porciones: Number(item.porciones) || 1,
+      tiempo_prep: item.tiempoPrep || "", ingredientes: item.ingredientes || [], pasos: item.pasos || [],
+      es_personalizada: flags.es_personalizada ?? true, eliminada: flags.eliminada ?? false
+    };
+  },
+
+  async getItemsUsuario(tabla) {
+    const { data, error } = await this.clienteSupabase().from(tabla).select("*")
+      .eq("es_personalizada", true).eq("eliminada", false).order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data || []).map((row) => this.itemDesdeFila(row));
+  },
+
+  async getItemsOcultos(tabla) {
+    const { data, error } = await this.clienteSupabase().from(tabla).select("slug").eq("eliminada", true);
+    if (error) throw error;
+    return (data || []).map((row) => row.slug);
+  },
+
+  async getItems(tabla, base) {
+    if (!window.supabaseClient) return [...base];
+    const { data, error } = await this.clienteSupabase().from(tabla).select("*");
+    if (error) throw error;
+    const filas = (data || []).map((row) => this.itemDesdeFila(row));
+    const ocultas = new Set(filas.filter((item) => item.eliminada).map((item) => item.slug));
+    const usuario = filas.filter((item) => item.es_personalizada && !item.eliminada);
+    const slugsUsuario = new Set(usuario.map((item) => item.slug));
+    return [...usuario, ...base.filter((item) => !slugsUsuario.has(item.slug) && !ocultas.has(item.slug))];
+  },
+
+  async getCatalogoUsuario() { return this.getItemsUsuario("catalogo_items"); },
+  async getCatalogoOcultas() { return this.getItemsOcultos("catalogo_items"); },
+  esCatalogoBase(slug) { return CATALOGO_SALSAS.some((item) => item.slug === slug); },
+  async getCatalogo() { return this.getItems("catalogo_items", CATALOGO_SALSAS); },
+  async getCatalogoBySlug(slug) { return (await this.getCatalogo()).find((item) => item.slug === slug) || null; },
+
+  async guardarCatalogoItem(item) {
+    const { error } = await this.clienteSupabase().from("catalogo_items")
+      .upsert(this.itemAFila(item), { onConflict: "slug" });
+    if (error) throw error;
+    return item;
+  },
+
+  async eliminarCatalogoItem(slug) {
+    const client = this.clienteSupabase();
+    if (this.esCatalogoBase(slug)) {
+      const base = CATALOGO_SALSAS.find((item) => item.slug === slug);
+      const actual = await this.getCatalogoBySlug(slug);
+      const { error } = await client.from("catalogo_items").upsert(
+        this.itemAFila({ ...base, ...actual }, { es_personalizada: false, eliminada: true }), { onConflict: "slug" }
+      );
+      if (error) throw error;
+    } else {
+      const { error } = await client.from("catalogo_items").delete().eq("slug", slug);
+      if (error) throw error;
+    }
+  },
+
+  async reemplazarCatalogo(items, slugsOcultos = []) {
+    const client = this.clienteSupabase();
+    const { error: borrarError } = await client.from("catalogo_items").delete().neq("slug", "");
+    if (borrarError) throw borrarError;
+    if (items.length) {
+      const { error } = await client.from("catalogo_items").upsert(items.map((item) => this.itemAFila(item)), { onConflict: "slug" });
+      if (error) throw error;
+    }
+    const ocultos = slugsOcultos.map((slug) => CATALOGO_SALSAS.find((item) => item.slug === slug)).filter(Boolean)
+      .map((item) => this.itemAFila(item, { es_personalizada: false, eliminada: true }));
+    if (ocultos.length) {
+      const { error } = await client.from("catalogo_items").upsert(ocultos, { onConflict: "slug" });
+      if (error) throw error;
+    }
+  },
+
+  async getBarUsuario() { return this.getItemsUsuario("bebidas"); },
+  async getBarOcultas() { return this.getItemsOcultos("bebidas"); },
+  esBarBase(slug) { return BAR_BEBIDAS.some((item) => item.slug === slug); },
+  async getBar() { return this.getItems("bebidas", BAR_BEBIDAS); },
+  async getBarBySlug(slug) { return (await this.getBar()).find((item) => item.slug === slug) || null; },
+
+  async guardarBarItem(item) {
+    const { error } = await this.clienteSupabase().from("bebidas")
+      .upsert(this.itemAFila(item), { onConflict: "slug" });
+    if (error) throw error;
+    return item;
+  },
+
+  async eliminarBarItem(slug) {
+    const client = this.clienteSupabase();
+    if (this.esBarBase(slug)) {
+      const base = BAR_BEBIDAS.find((item) => item.slug === slug);
+      const actual = await this.getBarBySlug(slug);
+      const { error } = await client.from("bebidas").upsert(
+        this.itemAFila({ ...base, ...actual }, { es_personalizada: false, eliminada: true }), { onConflict: "slug" }
+      );
+      if (error) throw error;
+    } else {
+      const { error } = await client.from("bebidas").delete().eq("slug", slug);
+      if (error) throw error;
+    }
+  },
+
+  async reemplazarBar(items, slugsOcultos = []) {
+    const client = this.clienteSupabase();
+    const { error: borrarError } = await client.from("bebidas").delete().neq("slug", "");
+    if (borrarError) throw borrarError;
+    if (items.length) {
+      const { error } = await client.from("bebidas").upsert(items.map((item) => this.itemAFila(item)), { onConflict: "slug" });
+      if (error) throw error;
+    }
+    const ocultos = slugsOcultos.map((slug) => BAR_BEBIDAS.find((item) => item.slug === slug)).filter(Boolean)
+      .map((item) => this.itemAFila(item, { es_personalizada: false, eliminada: true }));
+    if (ocultos.length) {
+      const { error } = await client.from("bebidas").upsert(ocultos, { onConflict: "slug" });
+      if (error) throw error;
+    }
+  },
+
+  async migrarCatalogoBarLocal() {
+    const marca = "portal_gastronomico_catalogo_bar_migrado_v1";
+    if (localStorage.getItem(marca)) return false;
+    const catalogo = JSON.parse(localStorage.getItem(LS_KEY_CATALOGO) || "[]");
+    const catalogoOcultas = JSON.parse(localStorage.getItem(LS_KEY_CATALOGO_OCULTAS) || "[]");
+    const bar = JSON.parse(localStorage.getItem(LS_KEY_BAR) || "[]");
+    const barOcultas = JSON.parse(localStorage.getItem(LS_KEY_BAR_OCULTAS) || "[]");
+    if (!catalogo.length && !catalogoOcultas.length && !bar.length && !barOcultas.length) {
+      localStorage.setItem(marca, "true");
+      return false;
+    }
+    const migrarTabla = async (tabla, items, slugsOcultos, base) => {
+      const filas = items.map((item) => this.itemAFila(item));
+      filas.push(...slugsOcultos.map((slug) => base.find((item) => item.slug === slug)).filter(Boolean)
+        .map((item) => this.itemAFila(item, { es_personalizada: false, eliminada: true })));
+      if (filas.length) {
+        const { error } = await this.clienteSupabase().from(tabla).upsert(filas, { onConflict: "slug" });
+        if (error) throw error;
+      }
+    };
+    if (catalogo.length || catalogoOcultas.length) await migrarTabla("catalogo_items", catalogo, catalogoOcultas, CATALOGO_SALSAS);
+    if (bar.length || barOcultas.length) await migrarTabla("bebidas", bar, barOcultas, BAR_BEBIDAS);
+    localStorage.removeItem(LS_KEY_CATALOGO);
+    localStorage.removeItem(LS_KEY_CATALOGO_OCULTAS);
+    localStorage.removeItem(LS_KEY_BAR);
+    localStorage.removeItem(LS_KEY_BAR_OCULTAS);
+    localStorage.setItem(marca, "true");
+    return true;
+  },
+
   /** Etiquetas legibles para equipo y carne, usadas en toda la web */
   LABELS_EQUIPO: {
     "caja-china": "Caja China",

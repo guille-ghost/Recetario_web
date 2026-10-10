@@ -213,21 +213,33 @@ function activarChecklist(receta) {
   actualizarContadores();
 }
 
-function renderMaridaje(receta) {
+async function renderMaridaje(receta) {
   const contSalsas = document.getElementById("maridaje-salsas");
   const contEnsaladas = document.getElementById("maridaje-ensaladas");
   const contBebidas = document.getElementById("maridaje-bebidas");
+  let catalogo, bebidasCatalogo;
+  try {
+    [catalogo, bebidasCatalogo] = await Promise.all([DataManager.getCatalogo(), DataManager.getBar()]);
+  } catch (error) {
+    console.error("Error cargando las sugerencias de maridaje:", error);
+    [contSalsas, contEnsaladas, contBebidas].forEach((contenedor) => {
+      contenedor.innerHTML = '<p class="text-sm text-ash">No se pudo cargar el maridaje.</p>';
+    });
+    return;
+  }
+  const catalogoPorSlug = new Map(catalogo.map((item) => [item.slug, item]));
+  const bebidasPorSlug = new Map(bebidasCatalogo.map((item) => [item.slug, item]));
 
   const salsas = (receta.maridajeSalsas || [])
-    .map((slug) => DataManager.getCatalogoBySlug(slug))
+    .map((slug) => catalogoPorSlug.get(slug))
     .filter(Boolean);
 
   const ensaladas = (receta.maridajeEnsaladas || [])
-    .map((slug) => DataManager.getCatalogoBySlug(slug))
+    .map((slug) => catalogoPorSlug.get(slug))
     .filter(Boolean);
 
   const bebidas = (receta.maridajeBebidas || [])
-    .map((slug) => DataManager.getBarBySlug(slug))
+    .map((slug) => bebidasPorSlug.get(slug))
     .filter(Boolean);
 
   contSalsas.innerHTML = salsas.length
@@ -243,7 +255,7 @@ function renderMaridaje(receta) {
     : `<p class="text-sm text-ash">Sin sugerencias registradas para esta receta.</p>`;
 
   document.querySelectorAll(".btn-maridaje").forEach((btn) => {
-    btn.addEventListener("click", () => abrirModalMaridaje(btn.dataset.slug, btn.dataset.origen));
+    btn.addEventListener("click", async () => abrirModalMaridaje(btn.dataset.slug, btn.dataset.origen));
   });
 }
 
@@ -271,8 +283,8 @@ const ETIQUETAS_TIPO = {
 };
 
 /* ---- Modal de preparación (reutilizado para salsas, acompañamientos y bebidas) ---- */
-function abrirModalMaridaje(slug, origen) {
-  const item = origen === "bar" ? DataManager.getBarBySlug(slug) : DataManager.getCatalogoBySlug(slug);
+async function abrirModalMaridaje(slug, origen) {
+  const item = origen === "bar" ? await DataManager.getBarBySlug(slug) : await DataManager.getCatalogoBySlug(slug);
   if (!item) return;
 
   const modal = document.getElementById("modal-preparacion");
