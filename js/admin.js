@@ -96,6 +96,83 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     return Array.from(select.selectedOptions).map((opt) => opt.value);
   }
 
+  /* Subida de imágenes a Supabase Storage; la URL pública queda en el campo existente. */
+  document.querySelectorAll("[data-image-upload]").forEach((selector) => {
+    const campoUrl = document.getElementById(selector.dataset.imageUpload);
+    const estado = document.getElementById(`${selector.dataset.imageUpload}-estado`);
+    const vistaPrevia = document.getElementById(`${selector.dataset.imageUpload}-vista-previa`);
+
+    const actualizarVistaPrevia = () => {
+      const url = campoUrl.value.trim();
+      if (url) {
+        vistaPrevia.src = url;
+        vistaPrevia.classList.remove("hidden");
+      } else {
+        vistaPrevia.removeAttribute("src");
+        vistaPrevia.classList.add("hidden");
+      }
+    };
+
+    campoUrl.addEventListener("input", actualizarVistaPrevia);
+    vistaPrevia.addEventListener("error", () => vistaPrevia.classList.add("hidden"));
+
+    selector.addEventListener("change", async () => {
+      const archivo = selector.files && selector.files[0];
+      if (!archivo) return;
+      estado.className = "text-xs text-ash";
+
+      if (!window.supabaseClient) {
+        estado.textContent = "Supabase no está configurado.";
+        estado.classList.add("text-red-300");
+        selector.value = "";
+        return;
+      }
+      if (!/^image\/(jpeg|png|webp|gif)$/.test(archivo.type) || archivo.size > 5 * 1024 * 1024) {
+        estado.textContent = "Usa JPG, PNG, WebP o GIF de hasta 5 MB.";
+        estado.classList.add("text-red-300");
+        selector.value = "";
+        return;
+      }
+
+      selector.disabled = true;
+      estado.textContent = "Subiendo imagen…";
+      try {
+        const extensiones = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+        const nombre = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${extensiones[archivo.type]}`;
+        const ruta = `${selector.dataset.imageFolder}/${nombre}`;
+        const { data, error } = await window.supabaseClient.storage
+          .from("imagenes")
+          .upload(ruta, archivo, { cacheControl: "3600", contentType: archivo.type, upsert: false });
+        if (error) throw error;
+
+        const { data: urlData } = window.supabaseClient.storage.from("imagenes").getPublicUrl(data.path);
+        campoUrl.value = urlData.publicUrl;
+        actualizarVistaPrevia();
+        estado.textContent = "Imagen subida correctamente.";
+        estado.className = "text-xs text-green-300";
+      } catch (error) {
+        console.error("Error subiendo imagen a Supabase Storage:", error);
+        estado.textContent = error.message || "No se pudo subir la imagen.";
+        estado.className = "text-xs text-red-300";
+      } finally {
+        selector.disabled = false;
+        selector.value = "";
+      }
+    });
+  });
+
+  document.querySelectorAll("#form-receta, #form-catalogo, #form-bar").forEach((formulario) => {
+    formulario.addEventListener("reset", () => {
+      setTimeout(() => {
+        formulario.querySelectorAll("[id$='-estado']").forEach((estado) => { estado.textContent = ""; });
+        formulario.querySelectorAll("[id$='-vista-previa']").forEach((imagen) => {
+          imagen.removeAttribute("src");
+          imagen.classList.add("hidden");
+        });
+      }, 0);
+    });
+  });
+
   /* ============================================================
      PESTAÑA 1: RECETAS
      ============================================================ */
@@ -162,6 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     document.getElementById("tiempoCoccion").value = receta.tiempoCoccion;
     document.getElementById("porciones").value = receta.porciones;
     document.getElementById("imagen").value = receta.imagen || "";
+    document.getElementById("imagen").dispatchEvent(new Event("input", { bubbles: true }));
     document.getElementById("descripcion").value = receta.descripcion;
     document.getElementById("ingredientes").value = (receta.ingredientes || []).join("\n");
     document.getElementById("pasos").value = (receta.pasos || []).join("\n");
@@ -321,6 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     document.getElementById("cat-tiempoPrep").value = item.tiempoPrep || "";
     document.getElementById("cat-porciones").value = item.porciones || 1;
     document.getElementById("cat-imagen").value = item.imagen || "";
+    document.getElementById("cat-imagen").dispatchEvent(new Event("input", { bubbles: true }));
     document.getElementById("cat-descripcion").value = item.descripcion || "";
     document.getElementById("cat-ingredientes").value = (item.ingredientes || []).join("\n");
     document.getElementById("cat-pasos").value = (item.pasos || []).join("\n");
@@ -460,6 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     document.getElementById("bar-tiempoPrep").value = item.tiempoPrep || "";
     document.getElementById("bar-porciones").value = item.porciones || 1;
     document.getElementById("bar-imagen").value = item.imagen || "";
+    document.getElementById("bar-imagen").dispatchEvent(new Event("input", { bubbles: true }));
     document.getElementById("bar-descripcion").value = item.descripcion || "";
     document.getElementById("bar-ingredientes").value = (item.ingredientes || []).join("\n");
     document.getElementById("bar-pasos").value = (item.pasos || []).join("\n");

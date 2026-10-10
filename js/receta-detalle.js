@@ -92,47 +92,51 @@ function renderReceta(receta) {
       </div>
     </div>
 
-    <div class="grid md:grid-cols-3 gap-10 mb-4">
-      <section class="md:col-span-1">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-display text-2xl text-ember">Ingredientes</h2>
-          <span id="contador-ingredientes" class="text-xs text-ash"></span>
+    <div class="grid xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.9fr)] gap-12 items-start">
+      <div>
+        <div class="grid md:grid-cols-[minmax(220px,0.9fr)_minmax(0,2fr)] gap-8 lg:gap-12 mb-4">
+          <section class="min-w-0">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-display text-2xl text-ember">Ingredientes</h2>
+              <span id="contador-ingredientes" class="text-xs text-ash"></span>
+            </div>
+            <ul class="space-y-3 text-gray-200">${ingredientesHtml}</ul>
+          </section>
+          <section class="min-w-0">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-display text-2xl text-ember">Preparación</h2>
+              <span id="contador-pasos" class="text-xs text-ash"></span>
+            </div>
+            <ol class="space-y-4 text-gray-200">${pasosHtml}</ol>
+          </section>
         </div>
-        <ul class="space-y-3 text-gray-200">${ingredientesHtml}</ul>
-      </section>
-      <section class="md:col-span-2">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-display text-2xl text-ember">Preparación</h2>
-          <span id="contador-pasos" class="text-xs text-ash"></span>
-        </div>
-        <ol class="space-y-4 text-gray-200">${pasosHtml}</ol>
-      </section>
-    </div>
 
-    <div class="mb-14">
-      <button id="btn-reiniciar-progreso" class="text-sm text-ash hover:text-ember transition underline">
-        Reiniciar checklist
-      </button>
-    </div>
-
-    <section id="modulo-maridaje" class="border-t border-ash/20 pt-10">
-      <p class="text-ember font-semibold tracking-widest text-xs uppercase mb-2">Maridaje sugerido</p>
-      <h2 class="font-display text-3xl mb-6">Cómo acompañar esta receta</h2>
-      <div class="grid sm:grid-cols-3 gap-8">
-        <div>
-          <h3 class="font-display text-lg mb-3">Salsas y acompañamientos</h3>
-          <div id="maridaje-salsas" class="grid gap-3"></div>
-        </div>
-        <div>
-          <h3 class="font-display text-lg mb-3">Ensaladas</h3>
-          <div id="maridaje-ensaladas" class="grid gap-3"></div>
-        </div>
-        <div>
-          <h3 class="font-display text-lg mb-3">Bebidas del Bar</h3>
-          <div id="maridaje-bebidas" class="grid gap-3"></div>
+        <div class="mb-14 lg:mb-0">
+          <button id="btn-reiniciar-progreso" class="text-sm text-ash hover:text-ember transition underline">
+            Reiniciar checklist
+          </button>
         </div>
       </div>
-    </section>
+
+      <section id="modulo-maridaje" class="xl:border-l xl:border-ash/20 xl:pl-8 border-t border-ash/20 pt-8 xl:border-t-0 xl:pt-0">
+        <p class="text-ember font-semibold tracking-widest text-xs uppercase mb-2">Maridaje sugerido</p>
+        <h2 class="font-display text-2xl mb-6">Cómo acompañar esta receta</h2>
+        <div class="grid gap-8">
+          <div>
+            <h3 class="font-display text-lg mb-3">Salsas y acompañamientos</h3>
+            <div id="maridaje-salsas" class="grid gap-3"></div>
+          </div>
+          <div>
+            <h3 class="font-display text-lg mb-3">Ensaladas</h3>
+            <div id="maridaje-ensaladas" class="grid gap-3"></div>
+          </div>
+          <div>
+            <h3 class="font-display text-lg mb-3">Bebidas del Bar</h3>
+            <div id="maridaje-bebidas" class="grid gap-3"></div>
+          </div>
+        </div>
+      </section>
+    </div>
   `;
 
   activarChecklist(receta);
