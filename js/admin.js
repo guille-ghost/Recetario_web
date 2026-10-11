@@ -48,7 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const tabPanels = {
     recetas: document.getElementById("tab-recetas"),
     catalogo: document.getElementById("tab-catalogo"),
-    bar: document.getElementById("tab-bar")
+    bar: document.getElementById("tab-bar"),
+    importaciones: document.getElementById("tab-importaciones")
   };
 
   tabBtns.forEach((btn) => {
@@ -256,6 +257,15 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     document.querySelector('[data-tab="recetas"]').click();
     formReceta.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+
+  window.addEventListener("recipe-draft-edit", async (event) => {
+    const receta = event.detail;
+    await entrarModoEdicionReceta({ ...receta, slug: "" });
+    editandoSlugInput.value = "";
+    btnGuardarReceta.textContent = "Guardar correcciones del borrador";
+    avisoEditandoNombre.textContent = `${receta.titulo} · borrador de importación`;
+    window.scrollTo({ top: formReceta.getBoundingClientRect().top + window.scrollY - 100, behavior: "smooth" });
+  });
 
   async function salirModoEdicionReceta() {
     editandoSlugInput.value = "";
