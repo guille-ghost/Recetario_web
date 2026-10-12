@@ -23,6 +23,34 @@ document.addEventListener("DOMContentLoaded", () => {
     finally { submit.disabled=false; }
   },true);
   function makeButton(label,action,id,accent=false){const b=document.createElement("button");b.type="button";b.textContent=label;b.dataset.action=action;b.dataset.id=id;b.className=`${accent?"bg-gradient-to-r from-ember to-lava":"border border-ash/40"} rounded-lg px-4 py-2 text-sm hover:border-ember`;return b;}
+  function openRecipeForm(recipe){
+    const setValue=(id,value)=>{const field=document.getElementById(id);if(field)field.value=value??"";};
+    setValue("receta-editando-slug",recipe.slug);
+    setValue("titulo",recipe.titulo);
+    setValue("equipo",recipe.equipo);
+    setValue("carne",recipe.carne);
+    setValue("tiempoPrep",recipe.tiempoPrep);
+    setValue("tiempoCoccion",recipe.tiempoCoccion);
+    setValue("porciones",recipe.porciones);
+    setValue("imagen",recipe.imagen);
+    setValue("descripcion",recipe.descripcion);
+    setValue("ingredientes",Array.isArray(recipe.ingredientes)?recipe.ingredientes.join("\n"):"");
+    setValue("pasos",Array.isArray(recipe.pasos)?recipe.pasos.join("\n"):"");
+    const selectValues=(id,values)=>{
+      const select=document.getElementById(id), selected=new Set(Array.isArray(values)?values:[]);
+      if(select)Array.from(select.options).forEach(option=>{option.selected=selected.has(option.value);});
+    };
+    selectValues("maridajeSalsas",recipe.maridajeSalsas);
+    selectValues("maridajeEnsaladas",recipe.maridajeEnsaladas);
+    selectValues("maridajeBebidas",recipe.maridajeBebidas);
+    const notice=document.getElementById("aviso-editando-receta"), noticeName=document.getElementById("aviso-editando-receta-nombre");
+    if(noticeName)noticeName.textContent=recipe.titulo||"Borrador importado";
+    notice?.classList.remove("hidden");
+    const save=document.getElementById("btn-guardar-receta");if(save)save.textContent="Guardar correcciones del borrador";
+    document.getElementById("btn-cancelar-edicion-receta")?.classList.remove("hidden");
+    document.querySelector('[data-tab="recetas"]')?.click();
+    document.getElementById("form-receta")?.scrollIntoView({behavior:"smooth",block:"start"});
+  }
   async function load(){
     message.textContent="Cargando borradores…";
     try {
@@ -45,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       if(button.dataset.action==="edit"){
         const draft=(await api("/api/importaciones/borradores")).find(x=>x.id===button.dataset.id);if(!draft)throw new Error("El borrador ya no está pendiente.");
-        activeDraftId=draft.id;window.dispatchEvent(new CustomEvent("recipe-draft-edit",{detail:draft.receta}));return;
+        activeDraftId=draft.id;openRecipeForm(draft.receta||{});return;
       }
       if(button.dataset.action==="publish"){
         if(!window.confirm("¿Publicar esta receta en el recetario?"))return;
