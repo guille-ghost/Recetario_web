@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
           credentials: "include",
           body: JSON.stringify({ action: "logout" })
         });
-        if (window.supabaseClient) await window.supabaseClient.auth.signOut();
         window.location.replace("/admin");
       });
     }
@@ -48,8 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const tabPanels = {
     recetas: document.getElementById("tab-recetas"),
     catalogo: document.getElementById("tab-catalogo"),
-    bar: document.getElementById("tab-bar"),
-    importaciones: document.getElementById("tab-importaciones")
+    bar: document.getElementById("tab-bar")
   };
 
   tabBtns.forEach((btn) => {
@@ -70,12 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   function mostrarMensaje(texto, esError) {
     mensajeExito.textContent = texto;
     mensajeExito.classList.remove("hidden");
-    mensajeExito.classList.toggle("border-green-500/60", !esError);
-    mensajeExito.classList.toggle("bg-green-950/50", !esError);
-    mensajeExito.classList.toggle("text-green-300", !esError);
-    mensajeExito.classList.toggle("border-red-500/60", esError);
-    mensajeExito.classList.toggle("bg-red-950/50", esError);
-    mensajeExito.classList.toggle("text-red-300", esError);
+    mensajeExito.classList.toggle("border-green-600", !esError);
+    mensajeExito.classList.toggle("bg-green-50", !esError);
+    mensajeExito.classList.toggle("text-green-800", !esError);
+    mensajeExito.classList.toggle("border-red-600", esError);
+    mensajeExito.classList.toggle("bg-red-50", esError);
+    mensajeExito.classList.toggle("text-red-800", esError);
     mensajeExito.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -97,83 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     return Array.from(select.selectedOptions).map((opt) => opt.value);
   }
 
-  /* Subida de imágenes a Supabase Storage; la URL pública queda en el campo existente. */
-  document.querySelectorAll("[data-image-upload]").forEach((selector) => {
-    const campoUrl = document.getElementById(selector.dataset.imageUpload);
-    const estado = document.getElementById(`${selector.dataset.imageUpload}-estado`);
-    const vistaPrevia = document.getElementById(`${selector.dataset.imageUpload}-vista-previa`);
-
-    const actualizarVistaPrevia = () => {
-      const url = campoUrl.value.trim();
-      if (url) {
-        vistaPrevia.src = url;
-        vistaPrevia.classList.remove("hidden");
-      } else {
-        vistaPrevia.removeAttribute("src");
-        vistaPrevia.classList.add("hidden");
-      }
-    };
-
-    campoUrl.addEventListener("input", actualizarVistaPrevia);
-    vistaPrevia.addEventListener("error", () => vistaPrevia.classList.add("hidden"));
-
-    selector.addEventListener("change", async () => {
-      const archivo = selector.files && selector.files[0];
-      if (!archivo) return;
-      estado.className = "text-xs text-ash";
-
-      if (!window.supabaseClient) {
-        estado.textContent = "Supabase no está configurado.";
-        estado.classList.add("text-red-300");
-        selector.value = "";
-        return;
-      }
-      if (!/^image\/(jpeg|png|webp|gif)$/.test(archivo.type) || archivo.size > 5 * 1024 * 1024) {
-        estado.textContent = "Usa JPG, PNG, WebP o GIF de hasta 5 MB.";
-        estado.classList.add("text-red-300");
-        selector.value = "";
-        return;
-      }
-
-      selector.disabled = true;
-      estado.textContent = "Subiendo imagen…";
-      try {
-        const extensiones = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
-        const nombre = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${extensiones[archivo.type]}`;
-        const ruta = `${selector.dataset.imageFolder}/${nombre}`;
-        const { data, error } = await window.supabaseClient.storage
-          .from("imagenes")
-          .upload(ruta, archivo, { cacheControl: "3600", contentType: archivo.type, upsert: false });
-        if (error) throw error;
-
-        const { data: urlData } = window.supabaseClient.storage.from("imagenes").getPublicUrl(data.path);
-        campoUrl.value = urlData.publicUrl;
-        actualizarVistaPrevia();
-        estado.textContent = "Imagen subida correctamente.";
-        estado.className = "text-xs text-green-300";
-      } catch (error) {
-        console.error("Error subiendo imagen a Supabase Storage:", error);
-        estado.textContent = error.message || "No se pudo subir la imagen.";
-        estado.className = "text-xs text-red-300";
-      } finally {
-        selector.disabled = false;
-        selector.value = "";
-      }
-    });
-  });
-
-  document.querySelectorAll("#form-receta, #form-catalogo, #form-bar").forEach((formulario) => {
-    formulario.addEventListener("reset", () => {
-      setTimeout(() => {
-        formulario.querySelectorAll("[id$='-estado']").forEach((estado) => { estado.textContent = ""; });
-        formulario.querySelectorAll("[id$='-vista-previa']").forEach((imagen) => {
-          imagen.removeAttribute("src");
-          imagen.classList.add("hidden");
-        });
-      }, 0);
-    });
-  });
-
   /* ============================================================
      PESTAÑA 1: RECETAS
      ============================================================ */
@@ -190,13 +111,12 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const btnGuardarReceta = document.getElementById("btn-guardar-receta");
   const btnCancelarEdicionReceta = document.getElementById("btn-cancelar-edicion-receta");
 
-  async function llenarMultiselectsMaridaje(seleccionadosSalsas = [], seleccionadosEnsaladas = [], seleccionadosBebidas = []) {
+  function llenarMultiselectsMaridaje(seleccionadosSalsas = [], seleccionadosEnsaladas = [], seleccionadosBebidas = []) {
     selectSalsas.innerHTML = "";
     selectEnsaladas.innerHTML = "";
     selectBebidas.innerHTML = "";
-    const [catalogo, bebidas] = await Promise.all([DataManager.getCatalogo(), DataManager.getBar()]);
 
-    catalogo
+    DataManager.getCatalogo()
       .filter((item) => item.tipo === "salsa" || item.tipo === "acompanamiento")
       .forEach((item) => {
         const opt = document.createElement("option");
@@ -206,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         selectSalsas.appendChild(opt);
       });
 
-    catalogo
+    DataManager.getCatalogo()
       .filter((item) => item.tipo === "ensalada")
       .forEach((item) => {
         const opt = document.createElement("option");
@@ -216,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         selectEnsaladas.appendChild(opt);
       });
 
-    bebidas.forEach((item) => {
+    DataManager.getBar().forEach((item) => {
       const opt = document.createElement("option");
       opt.value = item.slug;
       opt.textContent = item.nombre;
@@ -232,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     slugPreview.textContent = slug ? `receta.html?slug=${slug}` : "";
   });
 
-  async function entrarModoEdicionReceta(receta) {
+  function entrarModoEdicionReceta(receta) {
     editandoSlugInput.value = receta.slug;
     tituloInput.value = receta.titulo;
     document.getElementById("equipo").value = receta.equipo;
@@ -241,12 +161,11 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     document.getElementById("tiempoCoccion").value = receta.tiempoCoccion;
     document.getElementById("porciones").value = receta.porciones;
     document.getElementById("imagen").value = receta.imagen || "";
-    document.getElementById("imagen").dispatchEvent(new Event("input", { bubbles: true }));
     document.getElementById("descripcion").value = receta.descripcion;
     document.getElementById("ingredientes").value = (receta.ingredientes || []).join("\n");
     document.getElementById("pasos").value = (receta.pasos || []).join("\n");
 
-    await llenarMultiselectsMaridaje(receta.maridajeSalsas || [], receta.maridajeEnsaladas || [], receta.maridajeBebidas || []);
+    llenarMultiselectsMaridaje(receta.maridajeSalsas || [], receta.maridajeEnsaladas || [], receta.maridajeBebidas || []);
 
     slugPreview.textContent = `receta.html?slug=${receta.slug} (fijo mientras editas)`;
     avisoEditandoNombre.textContent = receta.titulo;
@@ -258,28 +177,19 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     formReceta.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  window.addEventListener("recipe-draft-edit", async (event) => {
-    const receta = event.detail;
-    await entrarModoEdicionReceta({ ...receta, slug: "" });
-    editandoSlugInput.value = "";
-    btnGuardarReceta.textContent = "Guardar correcciones del borrador";
-    avisoEditandoNombre.textContent = `${receta.titulo} · borrador de importación`;
-    window.scrollTo({ top: formReceta.getBoundingClientRect().top + window.scrollY - 100, behavior: "smooth" });
-  });
-
-  async function salirModoEdicionReceta() {
+  function salirModoEdicionReceta() {
     editandoSlugInput.value = "";
     formReceta.reset();
     slugPreview.textContent = "";
     avisoEditando.classList.add("hidden");
     btnGuardarReceta.textContent = "Guardar receta";
     btnCancelarEdicionReceta.classList.add("hidden");
-    await llenarMultiselectsMaridaje();
+    llenarMultiselectsMaridaje();
   }
 
   btnCancelarEdicionReceta.addEventListener("click", salirModoEdicionReceta);
 
-  formReceta.addEventListener("submit", async (e) => {
+  formReceta.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const titulo = tituloInput.value.trim();
@@ -310,32 +220,19 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       fecha: new Date().toISOString().slice(0, 10)
     };
 
-    try {
-      await DataManager.guardarReceta(receta);
-    } catch (error) {
-      console.error("Error guardando receta en Supabase:", error);
-      mostrarMensaje(`No se pudo guardar en Supabase: ${error.message}`, true);
-      return;
-    }
+    DataManager.guardarReceta(receta);
     mostrarMensaje(
       editandoSlug
         ? `Receta "${receta.titulo}" actualizada correctamente.`
         : `Receta "${receta.titulo}" guardada correctamente. Ya está visible en el recetario.`,
       false
     );
-    await salirModoEdicionReceta();
-    await renderGuardadas();
+    salirModoEdicionReceta();
+    renderGuardadas();
   });
 
-  async function renderGuardadas() {
-    let todas, recetasUsuario;
-    try {
-      [todas, recetasUsuario] = await Promise.all([DataManager.getRecetas(), DataManager.getRecetasUsuario()]);
-    } catch (error) {
-      console.error("Error consultando recetas en Supabase:", error);
-      listaGuardadas.innerHTML = '<p class="text-sm text-ash">No se pudieron cargar las recetas desde Supabase.</p>';
-      return;
-    }
+  function renderGuardadas() {
+    const todas = DataManager.getRecetas();
     listaGuardadas.innerHTML = "";
 
     if (todas.length === 0) {
@@ -345,41 +242,41 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
     todas.forEach((r) => {
       const esBase = DataManager.esRecetaBase(r.slug);
-      const fueEditada = esBase && recetasUsuario.some((u) => u.slug === r.slug);
+      const fueEditada = esBase && DataManager.getRecetasUsuario().some((u) => u.slug === r.slug);
       const fila = document.createElement("div");
-      fila.className = "flex items-center justify-between bg-smoke/90 border border-ash/20 rounded-lg px-4 py-3";
+      fila.className = "flex items-center justify-between bg-white/70 border border-ash/30 rounded-lg px-4 py-3";
       fila.innerHTML = `
         <div>
           <p class="font-medium flex items-center gap-2">
             ${r.titulo}
             ${esBase && !fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-ash/20 text-ash px-2 py-0.5 rounded-full">De fábrica</span>' : ""}
             ${fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-gold/20 text-gold px-2 py-0.5 rounded-full">Editada</span>' : ""}
-            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/20 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
+            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
           </p>
           <p class="text-xs text-ash">${DataManager.LABELS_EQUIPO[r.equipo] || r.equipo} · ${DataManager.LABELS_CARNE[r.carne] || r.carne}</p>
         </div>
         <div class="flex gap-3 text-sm">
           <a href="receta.html?slug=${r.slug}" class="text-ash hover:text-ember transition">Ver</a>
           <button data-slug="${r.slug}" class="btn-editar-receta text-ember hover:underline">Editar</button>
-          <button data-slug="${r.slug}" class="btn-eliminar-receta text-red-400 hover:text-red-300 hover:underline">Eliminar</button>
+          <button data-slug="${r.slug}" class="btn-eliminar-receta text-red-700 hover:underline">Eliminar</button>
         </div>
       `;
       listaGuardadas.appendChild(fila);
     });
 
     document.querySelectorAll(".btn-editar-receta").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const receta = await DataManager.getRecetaBySlug(btn.dataset.slug);
-        if (receta) await entrarModoEdicionReceta(receta);
+      btn.addEventListener("click", () => {
+        const receta = DataManager.getRecetaBySlug(btn.dataset.slug);
+        if (receta) entrarModoEdicionReceta(receta);
       });
     });
 
     document.querySelectorAll(".btn-eliminar-receta").forEach((btn) => {
-      btn.addEventListener("click", async () => {
+      btn.addEventListener("click", () => {
         if (confirm("¿Eliminar esta receta? Esta acción no se puede deshacer.")) {
-          await DataManager.eliminarReceta(btn.dataset.slug);
-          if (editandoSlugInput.value === btn.dataset.slug) await salirModoEdicionReceta();
-          await renderGuardadas();
+          DataManager.eliminarReceta(btn.dataset.slug);
+          if (editandoSlugInput.value === btn.dataset.slug) salirModoEdicionReceta();
+          renderGuardadas();
         }
       });
     });
@@ -410,7 +307,6 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     document.getElementById("cat-tiempoPrep").value = item.tiempoPrep || "";
     document.getElementById("cat-porciones").value = item.porciones || 1;
     document.getElementById("cat-imagen").value = item.imagen || "";
-    document.getElementById("cat-imagen").dispatchEvent(new Event("input", { bubbles: true }));
     document.getElementById("cat-descripcion").value = item.descripcion || "";
     document.getElementById("cat-ingredientes").value = (item.ingredientes || []).join("\n");
     document.getElementById("cat-pasos").value = (item.pasos || []).join("\n");
@@ -436,7 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
   btnCancelarEdicionCatalogo.addEventListener("click", salirModoEdicionCatalogo);
 
-  formCatalogo.addEventListener("submit", async (e) => {
+  formCatalogo.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const nombre = catNombreInput.value.trim();
@@ -461,13 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       pasos: textareaALista(document.getElementById("cat-pasos").value)
     };
 
-    try {
-      await DataManager.guardarCatalogoItem(item);
-    } catch (error) {
-      console.error("Error guardando catálogo en Supabase:", error);
-      mostrarMensaje(`No se pudo guardar en Supabase: ${error.message}`, true);
-      return;
-    }
+    DataManager.guardarCatalogoItem(item);
     mostrarMensaje(
       editandoSlug
         ? `"${item.nombre}" actualizado correctamente.`
@@ -475,19 +365,12 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       false
     );
     salirModoEdicionCatalogo();
-    await renderCatalogoGuardados();
-    await llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
+    renderCatalogoGuardados();
+    llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
   });
 
-  async function renderCatalogoGuardados() {
-    let todos, usuario;
-    try {
-      [todos, usuario] = await Promise.all([DataManager.getCatalogo(), DataManager.getCatalogoUsuario()]);
-    } catch (error) {
-      console.error("Error consultando catálogo en Supabase:", error);
-      listaCatalogoGuardados.innerHTML = '<p class="text-sm text-ash">No se pudo cargar el catálogo desde Supabase.</p>';
-      return;
-    }
+  function renderCatalogoGuardados() {
+    const todos = DataManager.getCatalogo();
     listaCatalogoGuardados.innerHTML = "";
 
     if (todos.length === 0) {
@@ -497,47 +380,42 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
     todos.forEach((i) => {
       const esBase = DataManager.esCatalogoBase(i.slug);
-      const fueEditada = esBase && usuario.some((u) => u.slug === i.slug);
+      const fueEditada = esBase && DataManager.getCatalogoUsuario().some((u) => u.slug === i.slug);
       const fila = document.createElement("div");
-      fila.className = "flex items-center justify-between bg-smoke/90 border border-ash/20 rounded-lg px-4 py-3";
+      fila.className = "flex items-center justify-between bg-white/70 border border-ash/30 rounded-lg px-4 py-3";
       fila.innerHTML = `
         <div>
           <p class="font-medium flex items-center gap-2">
             ${i.nombre}
             ${esBase && !fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-ash/20 text-ash px-2 py-0.5 rounded-full">De fábrica</span>' : ""}
             ${fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-gold/20 text-gold px-2 py-0.5 rounded-full">Editada</span>' : ""}
-            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/20 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
+            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
           </p>
           <p class="text-xs text-ash">${DataManager.LABELS_TIPO_CATALOGO[i.tipo] || i.tipo}</p>
         </div>
         <div class="flex gap-3 text-sm">
           <a href="catalogo.html" class="text-ash hover:text-ember transition">Ver</a>
           <button data-slug="${i.slug}" class="btn-editar-catalogo text-ember hover:underline">Editar</button>
-          <button data-slug="${i.slug}" class="btn-eliminar-catalogo text-red-400 hover:text-red-300 hover:underline">Eliminar</button>
+          <button data-slug="${i.slug}" class="btn-eliminar-catalogo text-red-700 hover:underline">Eliminar</button>
         </div>
       `;
       listaCatalogoGuardados.appendChild(fila);
     });
 
     document.querySelectorAll(".btn-editar-catalogo").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const item = await DataManager.getCatalogoBySlug(btn.dataset.slug);
+      btn.addEventListener("click", () => {
+        const item = DataManager.getCatalogoBySlug(btn.dataset.slug);
         if (item) entrarModoEdicionCatalogo(item);
       });
     });
 
     document.querySelectorAll(".btn-eliminar-catalogo").forEach((btn) => {
-      btn.addEventListener("click", async () => {
+      btn.addEventListener("click", () => {
         if (confirm("¿Eliminar este ítem del catálogo? Esta acción no se puede deshacer.")) {
-          try {
-            await DataManager.eliminarCatalogoItem(btn.dataset.slug);
-          } catch (error) {
-            mostrarMensaje(`No se pudo eliminar en Supabase: ${error.message}`, true);
-            return;
-          }
+          DataManager.eliminarCatalogoItem(btn.dataset.slug);
           if (catEditandoSlugInput.value === btn.dataset.slug) salirModoEdicionCatalogo();
-          await renderCatalogoGuardados();
-          await llenarMultiselectsMaridaje();
+          renderCatalogoGuardados();
+          llenarMultiselectsMaridaje();
         }
       });
     });
@@ -568,7 +446,6 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     document.getElementById("bar-tiempoPrep").value = item.tiempoPrep || "";
     document.getElementById("bar-porciones").value = item.porciones || 1;
     document.getElementById("bar-imagen").value = item.imagen || "";
-    document.getElementById("bar-imagen").dispatchEvent(new Event("input", { bubbles: true }));
     document.getElementById("bar-descripcion").value = item.descripcion || "";
     document.getElementById("bar-ingredientes").value = (item.ingredientes || []).join("\n");
     document.getElementById("bar-pasos").value = (item.pasos || []).join("\n");
@@ -594,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
   btnCancelarEdicionBar.addEventListener("click", salirModoEdicionBar);
 
-  formBar.addEventListener("submit", async (e) => {
+  formBar.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const nombre = barNombreInput.value.trim();
@@ -619,13 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       pasos: textareaALista(document.getElementById("bar-pasos").value)
     };
 
-    try {
-      await DataManager.guardarBarItem(item);
-    } catch (error) {
-      console.error("Error guardando bebidas en Supabase:", error);
-      mostrarMensaje(`No se pudo guardar en Supabase: ${error.message}`, true);
-      return;
-    }
+    DataManager.guardarBarItem(item);
     mostrarMensaje(
       editandoSlug
         ? `"${item.nombre}" actualizado correctamente.`
@@ -633,19 +504,12 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       false
     );
     salirModoEdicionBar();
-    await renderBarGuardados();
-    await llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
+    renderBarGuardados();
+    llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
   });
 
-  async function renderBarGuardados() {
-    let todos, usuario;
-    try {
-      [todos, usuario] = await Promise.all([DataManager.getBar(), DataManager.getBarUsuario()]);
-    } catch (error) {
-      console.error("Error consultando bebidas en Supabase:", error);
-      listaBarGuardados.innerHTML = '<p class="text-sm text-ash">No se pudieron cargar las bebidas desde Supabase.</p>';
-      return;
-    }
+  function renderBarGuardados() {
+    const todos = DataManager.getBar();
     listaBarGuardados.innerHTML = "";
 
     if (todos.length === 0) {
@@ -655,47 +519,42 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
     todos.forEach((i) => {
       const esBase = DataManager.esBarBase(i.slug);
-      const fueEditada = esBase && usuario.some((u) => u.slug === i.slug);
+      const fueEditada = esBase && DataManager.getBarUsuario().some((u) => u.slug === i.slug);
       const fila = document.createElement("div");
-      fila.className = "flex items-center justify-between bg-smoke/90 border border-ash/20 rounded-lg px-4 py-3";
+      fila.className = "flex items-center justify-between bg-white/70 border border-ash/30 rounded-lg px-4 py-3";
       fila.innerHTML = `
         <div>
           <p class="font-medium flex items-center gap-2">
             ${i.nombre}
             ${esBase && !fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-ash/20 text-ash px-2 py-0.5 rounded-full">De fábrica</span>' : ""}
             ${fueEditada ? '<span class="text-[10px] uppercase tracking-wide bg-gold/20 text-gold px-2 py-0.5 rounded-full">Editada</span>' : ""}
-            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/20 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
+            ${!esBase ? '<span class="text-[10px] uppercase tracking-wide bg-ember/10 text-ember px-2 py-0.5 rounded-full">Personalizada</span>' : ""}
           </p>
           <p class="text-xs text-ash">${DataManager.LABELS_TIPO_BAR[i.tipo] || i.tipo}</p>
         </div>
         <div class="flex gap-3 text-sm">
           <a href="bar.html" class="text-ash hover:text-ember transition">Ver</a>
           <button data-slug="${i.slug}" class="btn-editar-bar text-ember hover:underline">Editar</button>
-          <button data-slug="${i.slug}" class="btn-eliminar-bar text-red-400 hover:text-red-300 hover:underline">Eliminar</button>
+          <button data-slug="${i.slug}" class="btn-eliminar-bar text-red-700 hover:underline">Eliminar</button>
         </div>
       `;
       listaBarGuardados.appendChild(fila);
     });
 
     document.querySelectorAll(".btn-editar-bar").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const item = await DataManager.getBarBySlug(btn.dataset.slug);
+      btn.addEventListener("click", () => {
+        const item = DataManager.getBarBySlug(btn.dataset.slug);
         if (item) entrarModoEdicionBar(item);
       });
     });
 
     document.querySelectorAll(".btn-eliminar-bar").forEach((btn) => {
-      btn.addEventListener("click", async () => {
+      btn.addEventListener("click", () => {
         if (confirm("¿Eliminar esta bebida? Esta acción no se puede deshacer.")) {
-          try {
-            await DataManager.eliminarBarItem(btn.dataset.slug);
-          } catch (error) {
-            mostrarMensaje(`No se pudo eliminar en Supabase: ${error.message}`, true);
-            return;
-          }
+          DataManager.eliminarBarItem(btn.dataset.slug);
           if (barEditandoSlugInput.value === btn.dataset.slug) salirModoEdicionBar();
-          await renderBarGuardados();
-          await llenarMultiselectsMaridaje();
+          renderBarGuardados();
+          llenarMultiselectsMaridaje();
         }
       });
     });
@@ -709,29 +568,24 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const inputImportar = document.getElementById("input-importar");
   const btnGenerarCodigo = document.getElementById("btn-generar-codigo");
 
-  async function refrescarTodo() {
-    await llenarMultiselectsMaridaje();
-    await renderGuardadas();
-    await renderCatalogoGuardados();
-    await renderBarGuardados();
+  function refrescarTodo() {
+    llenarMultiselectsMaridaje();
+    renderGuardadas();
+    renderCatalogoGuardados();
+    renderBarGuardados();
   }
 
   /* ---- Exportar: descarga un .json con todo lo agregado/editado/eliminado ---- */
-  btnExportar.addEventListener("click", async () => {
-    const [recetas, recetasOcultas, catalogo, catalogoOcultas, bar, barOcultas] = await Promise.all([
-      DataManager.getRecetasUsuario(), DataManager.getRecetasOcultas(),
-      DataManager.getCatalogoUsuario(), DataManager.getCatalogoOcultas(),
-      DataManager.getBarUsuario(), DataManager.getBarOcultas()
-    ]);
+  btnExportar.addEventListener("click", () => {
     const respaldo = {
       version: 1,
       fecha: new Date().toISOString(),
-      recetas,
-      recetasOcultas,
-      catalogo,
-      catalogoOcultas,
-      bar,
-      barOcultas
+      recetas: DataManager.getRecetasUsuario(),
+      recetasOcultas: DataManager.getRecetasOcultas(),
+      catalogo: DataManager.getCatalogoUsuario(),
+      catalogoOcultas: DataManager.getCatalogoOcultas(),
+      bar: DataManager.getBarUsuario(),
+      barOcultas: DataManager.getBarOcultas()
     };
 
     const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: "application/json" });
@@ -755,24 +609,26 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     if (!archivo) return;
 
     const lector = new FileReader();
-    lector.onload = async () => {
+    lector.onload = () => {
       try {
         const datos = JSON.parse(lector.result);
 
-        if (!confirm("Importar reemplazará las recetas, salsas y bebidas personalizadas de Supabase por las del archivo. ¿Continuar?")) {
+        if (!confirm("Importar reemplazará las recetas, salsas y bebidas guardadas en este navegador por las del archivo. ¿Continuar?")) {
           inputImportar.value = "";
           return;
         }
 
-        await DataManager.reemplazarRecetas(datos.recetas || [], datos.recetasOcultas || []);
-        await DataManager.reemplazarCatalogo(datos.catalogo || [], datos.catalogoOcultas || []);
-        await DataManager.reemplazarBar(datos.bar || [], datos.barOcultas || []);
+        localStorage.setItem(LS_KEY_RECETAS, JSON.stringify(datos.recetas || []));
+        localStorage.setItem(LS_KEY_RECETAS_OCULTAS, JSON.stringify(datos.recetasOcultas || []));
+        localStorage.setItem(LS_KEY_CATALOGO, JSON.stringify(datos.catalogo || []));
+        localStorage.setItem(LS_KEY_CATALOGO_OCULTAS, JSON.stringify(datos.catalogoOcultas || []));
+        localStorage.setItem(LS_KEY_BAR, JSON.stringify(datos.bar || []));
+        localStorage.setItem(LS_KEY_BAR_OCULTAS, JSON.stringify(datos.barOcultas || []));
 
-        await refrescarTodo();
+        refrescarTodo();
         mostrarMensaje("Respaldo importado correctamente.", false);
       } catch (err) {
-        console.error("Error importando respaldo:", err);
-        mostrarMensaje(`No se pudo importar el respaldo: ${err.message}`, true);
+        mostrarMensaje("El archivo no es un respaldo válido (JSON incorrecto).", true);
       }
       inputImportar.value = "";
     };
@@ -785,9 +641,10 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const btnCopiarCodigo = document.getElementById("btn-copiar-codigo");
   const copiadoConfirmacion = document.getElementById("copiado-confirmacion");
 
-  async function generarCodigoDataJs() {
-    const recetas = await DataManager.getRecetasUsuario();
-    const [catalogo, bar] = await Promise.all([DataManager.getCatalogoUsuario(), DataManager.getBarUsuario()]);
+  function generarCodigoDataJs() {
+    const recetas = DataManager.getRecetasUsuario();
+    const catalogo = DataManager.getCatalogoUsuario();
+    const bar = DataManager.getBarUsuario();
     const bloques = [];
 
     if (recetas.length) {
@@ -814,8 +671,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
       : "// Todavía no has agregado ni editado nada desde este navegador.";
   }
 
-  btnGenerarCodigo.addEventListener("click", async () => {
-    codigoGenerado.value = await generarCodigoDataJs();
+  btnGenerarCodigo.addEventListener("click", () => {
+    codigoGenerado.value = generarCodigoDataJs();
     copiadoConfirmacion.classList.add("hidden");
     modalCodigo.classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
@@ -843,17 +700,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   });
 
   /* ---- Inicialización ---- */
-  (async () => {
-    try {
-      const migrado = await DataManager.migrarCatalogoBarLocal();
-      await llenarMultiselectsMaridaje();
-      await renderGuardadas();
-      await renderCatalogoGuardados();
-      await renderBarGuardados();
-      if (migrado) mostrarMensaje("Las salsas y bebidas guardadas en este navegador ya se migraron a Supabase.", false);
-    } catch (error) {
-      console.error("Error inicializando el panel de contenido:", error);
-      mostrarMensaje(`No se pudo conectar el catálogo y el Bar con Supabase: ${error.message}`, true);
-    }
-  })();
+  llenarMultiselectsMaridaje();
+  renderGuardadas();
+  renderCatalogoGuardados();
+  renderBarGuardados();
 });

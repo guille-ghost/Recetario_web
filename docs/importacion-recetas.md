@@ -14,6 +14,8 @@ La clave de idempotencia es `(drive_file_id, content_hash)`. El mismo archivo si
 
 ## Endpoints REST
 
+Se admiten varias recetas por archivo de Drive. Cada POST de borrador puede incluir `recipeKey` (estable dentro del archivo, por ejemplo `1`, `2`, ...); la clave única de borrador es `(importacion_archivo_id, receta_key)`. Si ya ejecutaste la migración original, ejecuta también `supabase/importaciones-recetas-multiples.sql` antes de desplegar este cambio.
+
 Todos están implementados por `api/importaciones/*` y usan `lib/importaciones.js`.
 
 | Ruta | Método | Acceso | Función |
@@ -28,7 +30,7 @@ La clave service role se usa solo desde funciones server-side. La tabla de recet
 
 ## Puesta en marcha
 
-1. Ejecuta `supabase/importaciones-recetas.sql` en Supabase SQL Editor.
+1. Ejecuta `supabase/importaciones-recetas.sql` en Supabase SQL Editor. Para una instalación existente, ejecuta además `supabase/importaciones-recetas-multiples.sql`.
 2. En Vercel define `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_SESSION_SECRET` (ya requerido por el login) y `N8N_IMPORT_SECRET`. Usa valores secretos fuertes y no los incluyas en el repositorio.
 3. Despliega Vercel y verifica que `GET /api/importaciones/borradores` sin sesión devuelva 401.
 4. Importa `n8n/drive-recetas-import.json`. El JSON contiene recepción de payload con header auth, validación básica y llamadas a los dos endpoints POST. Está inactivo al importarlo. Crea en n8n una credencial Header Auth llamada “Fuego webhook secret” con nombre de encabezado `X-Workflow-Secret` y un valor aleatorio privado; asígnala al nodo Webhook importado.
@@ -36,7 +38,9 @@ La clave service role se usa solo desde funciones server-side. La tabla de recet
 
 ## Google Drive personal
 
-El workflow exportado es una base de recepción de recetas ya extraídas; todavía no incorpora el nodo Google Drive porque no conocemos la versión o modalidad de la instancia n8n. En Google Cloud selecciona/crea un proyecto, habilita Drive API, configura OAuth consent como External para Gmail personal y añade tu cuenta como test user durante pruebas. Crea OAuth2 en n8n usando el callback que esa instalación muestra y scope de lectura Drive (`drive.readonly` si está soportado). No uses permisos de escritura o borrado.
+El workflow exportado es una base de recepción de recetas ya extraídas; todavía no incorpora el nodo Google Drive porque no conocemos la versión o modalidad de la instancia n8n. Añade el nodo **Google Drive Trigger** o **Google Drive** y crea la credencial correspondiente.
+
+Si usas **n8n Cloud**, elige **Sign in with Google** (OAuth administrado) cuando aparezca en la credencial. Autoriza tu cuenta personal; en este caso no necesitas crear un proyecto de Google Cloud. Si n8n te ofrece solo **Custom OAuth2**, o si usas n8n autohospedado, sí tendrás que configurar Google Cloud: crear/seleccionar un proyecto, habilitar Drive API, configurar OAuth consent como External para Gmail personal, añadir tu cuenta como test user durante pruebas y pegar el callback que n8n muestra en la credencial. Usa permisos de solo lectura; no configures escritura o borrado.
 
 En Drive abre tu carpeta privada y copia el ID del segmento `/folders/{id}`. En n8n configura Drive Trigger para nuevo archivo y limita el evento a ese folder; si esa versión no lo ofrece, usa polling periódico y compara ID/modifiedTime. Descarga el archivo en binario dentro de n8n, conserva el original y calcula SHA-256. Para TXT/CSV y formatos de oficina utiliza los extractores disponibles en esa versión; añade OCR para PDF escaneados e imágenes. ZIP debe extraerse con límites de tamaño, cantidad y profundidad.
 

@@ -15,6 +15,7 @@ create table if not exists public.importacion_archivos (
 create table if not exists public.recetas_borradores (
   id uuid primary key default gen_random_uuid(),
   importacion_archivo_id uuid not null references public.importacion_archivos(id) on delete restrict,
+  receta_key text not null default 'single',
   receta jsonb not null default '{}'::jsonb,
   estado text not null default 'pendiente' check (estado in ('pendiente','aprobado','descartado','publicado')),
   error_validacion jsonb not null default '[]'::jsonb,
@@ -22,9 +23,13 @@ create table if not exists public.recetas_borradores (
   revisado_en timestamptz,
   slug_publicado text,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (importacion_archivo_id)
+  updated_at timestamptz not null default now()
 );
+-- Compatible with installations that already ran the original one-draft-per-file schema.
+alter table public.recetas_borradores add column if not exists receta_key text not null default 'single';
+alter table public.recetas_borradores drop constraint if exists recetas_borradores_importacion_archivo_id_key;
+create unique index if not exists recetas_borradores_archivo_receta_key_uidx
+  on public.recetas_borradores(importacion_archivo_id, receta_key);
 create index if not exists importacion_archivos_estado_idx on public.importacion_archivos(estado, detectado_en desc);
 create index if not exists recetas_borradores_estado_idx on public.recetas_borradores(estado, created_at desc);
 alter table public.importacion_archivos enable row level security;
