@@ -47,7 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const tabPanels = {
     recetas: document.getElementById("tab-recetas"),
     catalogo: document.getElementById("tab-catalogo"),
-    bar: document.getElementById("tab-bar")
+    bar: document.getElementById("tab-bar"),
+    importaciones: document.getElementById("tab-importaciones")
   };
 
   tabBtns.forEach((btn) => {
