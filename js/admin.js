@@ -188,6 +188,10 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     llenarMultiselectsMaridaje();
   }
 
+  window.addEventListener("recipe-draft-edit", (event) => {
+    entrarModoEdicionReceta(event.detail || {});
+  });
+
   btnCancelarEdicionReceta.addEventListener("click", salirModoEdicionReceta);
 
   formReceta.addEventListener("submit", (e) => {
