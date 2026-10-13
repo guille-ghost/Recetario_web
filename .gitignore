@@ -2,8 +2,17 @@
 Thumbs.db
 node_modules/
 *.log
+__pycache__/
+*.py[cod]
 .vscode/
 .idea/
 .env
 .env.*
 !.env.example
+!automation/.env.example
+automation/local/
+automation/data/
+automation/.venv/
+automation/.env
+.vite/
+dist/

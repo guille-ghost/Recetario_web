@@ -1,9 +1,14 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/admin-panel", "destination": "/api/admin-panel" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin-login", "destination": "/admin.html" }
+    { "source": "/admin-panel", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/admin-login", "destination": "/index.html" },
+    { "source": "/recetario", "destination": "/index.html" },
+    { "source": "/receta", "destination": "/index.html" },
+    { "source": "/catalogo", "destination": "/index.html" },
+    { "source": "/bar", "destination": "/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
