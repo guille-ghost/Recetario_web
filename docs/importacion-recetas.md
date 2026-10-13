@@ -8,7 +8,7 @@ Desde la pestaña **Importación de archivos** del panel se selecciona la catego
 Panel React → API Node.js/Vercel → FastAPI/Python → Ollama local → Supabase (borradores)
 ```
 
-No se usa Google Drive ni Google Cloud. La API de Vercel valida la sesión del administrador y reenvía el archivo al servicio Python usando un secreto privado. Ese secreto nunca llega al navegador. El servicio Python manda los borradores a los endpoints protegidos de Node con `N8N_IMPORT_SECRET`, conservado por compatibilidad.
+La automatización actual usa Python/FastAPI. No se usa Google Drive ni Google Cloud. La API de Vercel valida la sesión del administrador y reenvía el archivo al servicio Python usando un secreto privado. Ese secreto nunca llega al navegador. El servicio Python manda los borradores a los endpoints protegidos de Node con `N8N_IMPORT_SECRET`, conservado por compatibilidad y no como flujo activo principal.
 
 ## Formatos y límites
 

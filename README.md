@@ -1,6 +1,6 @@
 -# El Festín de Belcebú · Portal Gastronómico Parrillero
 
-Portal gastronómico con interfaz React y Tailwind CSS (Vite), funciones API en Node.js y Supabase. La automatización de importación actual usa n8n.
+Portal gastronómico con interfaz React y Tailwind CSS (Vite), funciones API en Node.js y Supabase. La automatización de importación actual usa Python/FastAPI en `automation/`.
 
 ## Desarrollo
 
@@ -33,7 +33,8 @@ api/                 Funciones serverless Node.js para Vercel
 lib/                 Lógica compartida de endpoints de importación
 js/data.js           Acceso a Supabase y compatibilidad con páginas antiguas
 supabase/            Esquema y migraciones SQL
-n8n/                 Workflow actual de importación de recetas
+automation/          Automatización actual de importación con Python/FastAPI
+n8n/                 Workflow heredado / legacy, no activo en la implementación actual
 ```
 
-Las rutas y contratos de API, y el esquema Supabase, se mantienen. La validación de sesión administrativa ahora se comparte desde `lib/admin-session.js` entre el login, el acceso legado al panel y la revisión de borradores. La migración de n8n a Python queda para una fase posterior.
+Las rutas y contratos de API, y el esquema Supabase, se mantienen. La validación de sesión administrativa ahora se comparte desde `lib/admin-session.js` entre el login, el acceso legado al panel y la revisión de borradores. La automatización actual quedó implementada con Python/FastAPI y n8n queda como referencia heredada.
