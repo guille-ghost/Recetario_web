@@ -1,6 +1,7 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/admin-panel", "destination": "/private/admin-panel.html" },
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/admin-login", "destination": "/admin.html" },
@@ -33,7 +34,7 @@
       ]
     },
     {
-      "source": "/api/admin",
+      "source": "/api/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "no-store" },
         { "key": "Pragma", "value": "no-cache" }
