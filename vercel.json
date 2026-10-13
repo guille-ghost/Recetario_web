@@ -1,9 +1,9 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/admin-panel", "destination": "/index.html" },
-    { "source": "/admin", "destination": "/index.html" },
-    { "source": "/admin-login", "destination": "/index.html" },
+    { "source": "/admin-panel", "destination": "/private/admin-panel.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin-login", "destination": "/admin.html" },
     { "source": "/recetario", "destination": "/index.html" },
     { "source": "/receta", "destination": "/index.html" },
     { "source": "/catalogo", "destination": "/index.html" },
@@ -11,6 +11,27 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
+    {
+      "source": "/admin",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Pragma", "value": "no-cache" }
+      ]
+    },
+    {
+      "source": "/admin-panel",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Pragma", "value": "no-cache" }
+      ]
+    },
+    {
+      "source": "/admin-login",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Pragma", "value": "no-cache" }
+      ]
+    },
     {
       "source": "/api/admin",
       "headers": [
