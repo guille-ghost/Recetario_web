@@ -8,11 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>
-    tailwind.config = { theme: { extend: {
-      colors: { charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF6A00", lava: "#D92600", gold: "#FFB000", sulfur: "#FFB000", parchment: "#F3F0EC", ash: "#A0988E" },
-      fontFamily: { display: ["Cinzel Decorative", "serif"], body: ["Inter", "sans-serif"] },
-      boxShadow: { 'ember-glow': '0 0 25px -5px rgba(255, 106, 0, 0.5)', 'lava-glow': '0 0 35px -5px rgba(217, 38, 0, 0.6)' }
-    } };
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { charcoal: "#0B0A09", smoke: "#1C1815", ember: "#FF6A00", lava: "#D92600", gold: "#FFB000", sulfur: "#FFB000", parchment: "#F3F0EC", ash: "#A0988E" },
+          fontFamily: { display: ["Cinzel Decorative", "serif"], body: ["Inter", "sans-serif"] },
+          boxShadow: { 'ember-glow': '0 0 25px -5px rgba(255, 106, 0, 0.5)', 'lava-glow': '0 0 35px -5px rgba(217, 38, 0, 0.6)' }
+        }
+      }
+    };
   </script>
   <link rel="stylesheet" href="css/custom.css">
 </head>
@@ -37,6 +41,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-client.js"></script>
   <script>
+    async function parseJsonResponse(response) {
+      const text = await response.text();
+      if (!text) return {};
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { error: text.slice(0, 180) };
+      }
+    }
+
     document.getElementById("login-form").addEventListener("submit", async (event) => {
       event.preventDefault();
       const email = document.getElementById("admin-email").value.trim();
@@ -54,10 +68,11 @@
           credentials: "include",
           body: JSON.stringify({ access_token: authData.session.access_token })
         });
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok || !data.authenticated) {
           await window.supabaseClient.auth.signOut();
-          message.textContent = data.error || "Esta cuenta no está autorizada para administrar el sitio.";
+          const detail = data.error || "Esta cuenta no está autorizada para administrar el sitio.";
+          message.textContent = detail.includes("<") ? "La API respondió con contenido no válido. Revisa la configuración de Vercel y la ruta /api/admin." : detail;
           return;
         }
         window.location.href = "/admin-panel";
@@ -69,3 +84,5 @@
   <script src="js/brasas.js"></script>
 </body>
 </html>
+    
+  

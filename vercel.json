@@ -1,13 +1,28 @@
 {
   "version": 2,
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/admin-panel", "destination": "/api/admin-panel" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin-login", "destination": "/admin.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
-      "source": "/api/admin",
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Pragma", "value": "no-cache" }
+      ]
+    },
+    {
+      "source": "/admin-panel",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Pragma", "value": "no-cache" }
+      ]
+    },
+    {
+      "source": "/admin",
       "headers": [
         { "key": "Cache-Control", "value": "no-store" },
         { "key": "Pragma", "value": "no-cache" }
