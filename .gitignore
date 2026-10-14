@@ -16,3 +16,6 @@ automation/.venv/
 automation/.env
 .vite/
 dist/
+
+.vercel
+.env*
