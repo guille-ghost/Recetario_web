@@ -1,11 +1,9 @@
 {
   "version": 2,
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
+  "installCommand": "npm --prefix client install",
+  "buildCommand": "npm --prefix client run build",
+  "outputDirectory": "client/dist/client",
   "rewrites": [
-    { "source": "/admin-panel", "destination": "/private/admin-panel.html" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin-login", "destination": "/admin.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

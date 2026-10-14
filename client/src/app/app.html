@@ -1,0 +1,14 @@
+<canvas id="canvas-brasas" data-scope="viewport" aria-hidden="true" class="canvas-brasas-fondo"></canvas>
+<header class="site-header sticky top-0 z-30 border-b border-ember/30 bg-charcoal/90 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+    <a routerLink="/" class="brand-fire font-display text-lg sm:text-2xl">El Festín de Belcebú</a>
+    <nav class="flex gap-3 text-xs text-ash sm:gap-6 sm:text-sm" aria-label="Navegación principal">
+      <a routerLink="/" routerLinkActive="text-gold" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+      <a routerLink="/recetario" routerLinkActive="text-gold">Recetario</a>
+      <a routerLink="/catalogo" routerLinkActive="text-gold">Salsas</a>
+      <a routerLink="/bar" routerLinkActive="text-gold">Bar</a>
+    </nav>
+  </div>
+</header>
+<router-outlet />
+<footer class="mt-16 border-t border-ash/20 py-8 text-center text-xs text-ash">El Festín de Belcebú · Recetas para cocinar al fuego</footer>

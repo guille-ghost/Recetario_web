@@ -14,6 +14,26 @@ document.addEventListener("DOMContentLoaded", () => {
     equipo: "",
     carne: ""
   };
+  const cacheKey = "portal-content:recipes";
+
+  function leerRecetasEnCache() {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
+      return cached && Date.now() - cached.savedAt < 120_000 && Array.isArray(cached.items)
+        ? cached.items
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function guardarRecetasEnCache(recetas) {
+    try {
+      sessionStorage.setItem(cacheKey, JSON.stringify({ items: recetas, savedAt: Date.now() }));
+    } catch {}
+  }
+
+  let recetasDisponibles = leerRecetasEnCache();
 
   /* Lee filtros iniciales desde la URL, si vienen (ej. desde index.html) */
   const params = new URLSearchParams(window.location.search);
@@ -26,8 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  async function renderTarjetas() {
-    const recetas = (await DataManager.getRecetas()).filter((r) => {
+  function renderTarjetas() {
+    const recetas = recetasDisponibles.filter((r) => {
       const coincideEquipo = !estado.equipo || r.equipo === estado.equipo;
       const coincideCarne = !estado.carne || r.carne === estado.carne;
       return coincideEquipo && coincideCarne;
@@ -69,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!btn) return;
     estado.equipo = btn.dataset.value;
     activarChip("equipo", estado.equipo);
-    renderTarjetas().catch(mostrarError);
+    if (recetasDisponibles) renderTarjetas();
   });
 
   document.getElementById("filtro-carne").addEventListener("click", (e) => {
@@ -77,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!btn) return;
     estado.carne = btn.dataset.value;
     activarChip("carne", estado.carne);
-    renderTarjetas().catch(mostrarError);
+    if (recetasDisponibles) renderTarjetas();
   });
 
   activarChip("equipo", estado.equipo);
@@ -88,5 +108,15 @@ document.addEventListener("DOMContentLoaded", () => {
     contador.textContent = "";
   }
 
-  renderTarjetas().catch(mostrarError);
+  if (recetasDisponibles) renderTarjetas();
+  DataManager.getRecetas()
+    .then((recetas) => {
+      recetasDisponibles = recetas;
+      guardarRecetasEnCache(recetas);
+      renderTarjetas();
+    })
+    .catch((error) => {
+      if (!recetasDisponibles) mostrarError(error);
+      else console.error("Error actualizando recetas:", error);
+    });
 });
