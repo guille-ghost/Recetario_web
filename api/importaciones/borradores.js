@@ -1,2 +1,3 @@
-const { handle } = require("../../lib/importaciones");
-module.exports = (req, res) => handle(req, res, { resource: "borradores", onlyPending: true });
+import { handle } from '../../lib/importaciones.js';
+
+export default (req, res) => handle(req, res, { resource: 'borradores', onlyPending: true });

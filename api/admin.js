@@ -1,10 +1,10 @@
-const {
+import {
   COOKIE_MAX_AGE,
   adminSessionCookie,
   getAuthorizedAdmin,
   signAdminSession,
   verifyAdminSession,
-} = require('../lib/admin-session');
+} from '../lib/admin-session.js';
 
 function sendJson(response, statusCode, body) {
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -20,7 +20,7 @@ async function readJsonBody(request) {
   return request.body;
 }
 
-module.exports = async function handler(request, response) {
+export default async function handler(request, response) {
   const { ADMIN_SESSION_SECRET, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_ANON_KEY, SUPABASE_ADMIN_EMAIL } = process.env;
   if (!ADMIN_SESSION_SECRET || !SUPABASE_URL || !(SUPABASE_PUBLISHABLE_KEY || SUPABASE_ANON_KEY) || !SUPABASE_ADMIN_EMAIL) {
     sendJson(response, 503, { error: 'Falta configurar la autenticación de Supabase en el servidor.' });
@@ -63,4 +63,4 @@ module.exports = async function handler(request, response) {
   }
 
   sendJson(response, 405, { error: 'Método no permitido.' });
-};
+}
