@@ -9,11 +9,6 @@ __pycache__/
 .env
 .env.*
 !.env.example
-!automation/.env.example
-automation/local/
-automation/data/
-automation/.venv/
-automation/.env
 .vite/
 dist/
 
