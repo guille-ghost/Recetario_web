@@ -922,3 +922,7 @@ const DataManager = {
     "sin-alcohol": "Sin alcohol"
   }
 };
+
+// Expone el gestor para la interfaz React y conserva su disponibilidad para
+// las pantallas administrativas que aún cargan este archivo como script clásico.
+window.DataManager = DataManager;

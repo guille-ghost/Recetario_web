@@ -97,7 +97,6 @@
     <button data-tab="recetas" class="tab-btn tab-activo px-4 py-3 text-sm font-semibold">Recetas</button>
     <button data-tab="catalogo" class="tab-btn px-4 py-3 text-sm font-semibold">Salsas, Acompañamientos y Ensaladas</button>
     <button data-tab="bar" class="tab-btn px-4 py-3 text-sm font-semibold">Bebidas (Bar)</button>
-    <button data-tab="importaciones" class="tab-btn px-4 py-3 text-sm font-semibold">Importación automática</button>
   </div>
 
   <div id="mensaje-exito" class="hidden mb-6 rounded-lg border px-4 py-3 text-sm"></div>
@@ -439,18 +438,6 @@
     </section>
   </section>
 
-  <section id="tab-importaciones" class="tab-panel hidden">
-    <div class="bg-smoke/80 border border-ash/20 rounded-xl p-6 mb-6">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div><h2 class="font-display text-2xl text-ember">Importación automática de recetas</h2>
-          <p class="text-sm text-ash mt-2">Los borradores de Drive no aparecen en el sitio hasta que los revises y publiques aquí.</p></div>
-        <button id="imports-refresh" type="button" class="border border-ash/40 rounded-lg px-4 py-2 text-sm hover:border-ember">Actualizar</button>
-      </div>
-      <p id="imports-message" class="text-sm mt-4" role="status" aria-live="polite"></p>
-    </div>
-    <div id="imports-list" class="space-y-4"></div>
-  </section>
-
 </main>
 
 <!-- MODAL: CÓDIGO PARA data.js -->
@@ -482,8 +469,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/supabase-client.js"></script>
 <script src="/js/data.js"></script>
-<script src="/js/admin.js"></script>
-<script src="/js/importaciones.js"></script>
+<script src="/js/admin.js?v=4.1"></script>
 <script src="/js/brasas.js"></script>
 </body>
 </html>

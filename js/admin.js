@@ -47,15 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const tabPanels = {
     recetas: document.getElementById("tab-recetas"),
     catalogo: document.getElementById("tab-catalogo"),
-    bar: document.getElementById("tab-bar"),
-    importaciones: document.getElementById("tab-importaciones")
+    bar: document.getElementById("tab-bar")
   };
 
   tabBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
       tabBtns.forEach((b) => b.classList.toggle("tab-activo", b === btn));
       Object.entries(tabPanels).forEach(([key, panel]) => {
-        panel.classList.toggle("hidden", key !== btn.dataset.tab);
+        if (panel) {
+          panel.classList.toggle("hidden", key !== btn.dataset.tab);
+        }
       });
       ocultarMensaje();
     });
@@ -112,12 +113,14 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const btnGuardarReceta = document.getElementById("btn-guardar-receta");
   const btnCancelarEdicionReceta = document.getElementById("btn-cancelar-edicion-receta");
 
-  function llenarMultiselectsMaridaje(seleccionadosSalsas = [], seleccionadosEnsaladas = [], seleccionadosBebidas = []) {
+  async function llenarMultiselectsMaridaje(seleccionadosSalsas = [], seleccionadosEnsaladas = [], seleccionadosBebidas = []) {
     selectSalsas.innerHTML = "";
     selectEnsaladas.innerHTML = "";
     selectBebidas.innerHTML = "";
 
-    DataManager.getCatalogo()
+    const [catalogo, bebidas] = await Promise.all([DataManager.getCatalogo(), DataManager.getBar()]);
+
+    catalogo
       .filter((item) => item.tipo === "salsa" || item.tipo === "acompanamiento")
       .forEach((item) => {
         const opt = document.createElement("option");
@@ -127,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         selectSalsas.appendChild(opt);
       });
 
-    DataManager.getCatalogo()
+    catalogo
       .filter((item) => item.tipo === "ensalada")
       .forEach((item) => {
         const opt = document.createElement("option");
@@ -137,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
         selectEnsaladas.appendChild(opt);
       });
 
-    DataManager.getBar().forEach((item) => {
+    bebidas.forEach((item) => {
       const opt = document.createElement("option");
       opt.value = item.slug;
       opt.textContent = item.nombre;
@@ -236,8 +239,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     renderGuardadas();
   });
 
-  function renderGuardadas() {
-    const todas = DataManager.getRecetas();
+  async function renderGuardadas() {
+    const [todas, recetasUsuario] = await Promise.all([DataManager.getRecetas(), DataManager.getRecetasUsuario()]);
     listaGuardadas.innerHTML = "";
 
     if (todas.length === 0) {
@@ -247,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
     todas.forEach((r) => {
       const esBase = DataManager.esRecetaBase(r.slug);
-      const fueEditada = esBase && DataManager.getRecetasUsuario().some((u) => u.slug === r.slug);
+      const fueEditada = esBase && recetasUsuario.some((u) => u.slug === r.slug);
       const fila = document.createElement("div");
       fila.className = "flex items-center justify-between bg-white/70 border border-ash/30 rounded-lg px-4 py-3";
       fila.innerHTML = `
@@ -270,16 +273,16 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     });
 
     document.querySelectorAll(".btn-editar-receta").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const receta = DataManager.getRecetaBySlug(btn.dataset.slug);
+      btn.addEventListener("click", async () => {
+        const receta = await DataManager.getRecetaBySlug(btn.dataset.slug);
         if (receta) entrarModoEdicionReceta(receta);
       });
     });
 
     document.querySelectorAll(".btn-eliminar-receta").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         if (confirm("¿Eliminar esta receta? Esta acción no se puede deshacer.")) {
-          DataManager.eliminarReceta(btn.dataset.slug);
+          await DataManager.eliminarReceta(btn.dataset.slug);
           if (editandoSlugInput.value === btn.dataset.slug) salirModoEdicionReceta();
           renderGuardadas();
         }
@@ -374,8 +377,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
   });
 
-  function renderCatalogoGuardados() {
-    const todos = DataManager.getCatalogo();
+  async function renderCatalogoGuardados() {
+    const [todos, catalogoUsuario] = await Promise.all([DataManager.getCatalogo(), DataManager.getCatalogoUsuario()]);
     listaCatalogoGuardados.innerHTML = "";
 
     if (todos.length === 0) {
@@ -385,7 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
     todos.forEach((i) => {
       const esBase = DataManager.esCatalogoBase(i.slug);
-      const fueEditada = esBase && DataManager.getCatalogoUsuario().some((u) => u.slug === i.slug);
+      const fueEditada = esBase && catalogoUsuario.some((u) => u.slug === i.slug);
       const fila = document.createElement("div");
       fila.className = "flex items-center justify-between bg-white/70 border border-ash/30 rounded-lg px-4 py-3";
       fila.innerHTML = `
@@ -408,16 +411,16 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     });
 
     document.querySelectorAll(".btn-editar-catalogo").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const item = DataManager.getCatalogoBySlug(btn.dataset.slug);
+      btn.addEventListener("click", async () => {
+        const item = await DataManager.getCatalogoBySlug(btn.dataset.slug);
         if (item) entrarModoEdicionCatalogo(item);
       });
     });
 
     document.querySelectorAll(".btn-eliminar-catalogo").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         if (confirm("¿Eliminar este ítem del catálogo? Esta acción no se puede deshacer.")) {
-          DataManager.eliminarCatalogoItem(btn.dataset.slug);
+          await DataManager.eliminarCatalogoItem(btn.dataset.slug);
           if (catEditandoSlugInput.value === btn.dataset.slug) salirModoEdicionCatalogo();
           renderCatalogoGuardados();
           llenarMultiselectsMaridaje();
@@ -513,8 +516,8 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     llenarMultiselectsMaridaje(); // refresca el selector de maridaje de recetas
   });
 
-  function renderBarGuardados() {
-    const todos = DataManager.getBar();
+  async function renderBarGuardados() {
+    const [todos, barUsuario] = await Promise.all([DataManager.getBar(), DataManager.getBarUsuario()]);
     listaBarGuardados.innerHTML = "";
 
     if (todos.length === 0) {
@@ -524,7 +527,7 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
 
     todos.forEach((i) => {
       const esBase = DataManager.esBarBase(i.slug);
-      const fueEditada = esBase && DataManager.getBarUsuario().some((u) => u.slug === i.slug);
+      const fueEditada = esBase && barUsuario.some((u) => u.slug === i.slug);
       const fila = document.createElement("div");
       fila.className = "flex items-center justify-between bg-white/70 border border-ash/30 rounded-lg px-4 py-3";
       fila.innerHTML = `
@@ -547,16 +550,16 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
     });
 
     document.querySelectorAll(".btn-editar-bar").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const item = DataManager.getBarBySlug(btn.dataset.slug);
+      btn.addEventListener("click", async () => {
+        const item = await DataManager.getBarBySlug(btn.dataset.slug);
         if (item) entrarModoEdicionBar(item);
       });
     });
 
     document.querySelectorAll(".btn-eliminar-bar").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         if (confirm("¿Eliminar esta bebida? Esta acción no se puede deshacer.")) {
-          DataManager.eliminarBarItem(btn.dataset.slug);
+          await DataManager.eliminarBarItem(btn.dataset.slug);
           if (barEditandoSlugInput.value === btn.dataset.slug) salirModoEdicionBar();
           renderBarGuardados();
           llenarMultiselectsMaridaje();
@@ -705,8 +708,13 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   });
 
   /* ---- Inicialización ---- */
-  llenarMultiselectsMaridaje();
-  renderGuardadas();
-  renderCatalogoGuardados();
-  renderBarGuardados();
+  Promise.all([
+    llenarMultiselectsMaridaje(),
+    renderGuardadas(),
+    renderCatalogoGuardados(),
+    renderBarGuardados()
+  ]).catch((error) => {
+    console.error("No se pudo cargar el contenido del panel:", error);
+    mostrarMensaje("No se pudo cargar el contenido. Recarga la página e inténtalo de nuevo.", true);
+  });
 });
