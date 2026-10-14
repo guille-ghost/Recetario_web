@@ -24,8 +24,6 @@ export default defineConfig({
         'receta-legacy': 'receta.html',
         'catalogo-legacy': 'catalogo.html',
         'bar-legacy': 'bar.html',
-        'admin-legacy': 'admin.html',
-        'admin-login-legacy': 'admin-login.html',
       },
     },
   },

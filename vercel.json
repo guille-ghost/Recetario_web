@@ -4,18 +4,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/|js/|css/|assets/|.*\\.html$).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
       "source": "/api/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store" },
-        { "key": "Pragma", "value": "no-cache" }
-      ]
-    },
-    {
-      "source": "/admin-panel",
       "headers": [
         { "key": "Cache-Control", "value": "no-store" },
         { "key": "Pragma", "value": "no-cache" }
