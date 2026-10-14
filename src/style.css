@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-charcoal: #0B0A09;
+  --color-smoke: #1C1815;
+  --color-ember: #FF6A00;
+  --color-lava: #D92600;
+  --color-gold: #FFB000;
+  --color-ash: #A0988E;
+  --font-display: "Cinzel Decorative", serif;
+  --font-body: "Inter", sans-serif;
+  --shadow-ember-glow: 0 0 25px -5px rgba(255, 106, 0, .5);
+  --shadow-lava-glow: 0 0 35px -5px rgba(217, 38, 0, .6);
+}
+
+body { isolation: isolate; color-scheme: dark; min-height: 100vh; background-color: #0B0A09; color: #F3F0EC; font-family: var(--font-body); background-image: radial-gradient(circle at 20% 10%, rgba(255,106,0,.08), transparent 40%), radial-gradient(circle at 80% 0%, rgba(255,176,0,.08), transparent 35%); }
+.brand-fire { display: inline-block; background: linear-gradient(100deg,#fff1a8 0%,#ffb000 34%,#ff6a00 68%,#d92600 100%); background-clip: text; -webkit-background-clip: text; color: transparent; filter: drop-shadow(0 0 5px rgba(255,106,0,.56)); animation: flicker 3s ease-in-out infinite alternate; }
+@keyframes flicker { to { filter: drop-shadow(0 0 8px rgba(255,112,24,.72)) brightness(1.12); } }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

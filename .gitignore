@@ -2,8 +2,15 @@
 Thumbs.db
 node_modules/
 *.log
+__pycache__/
+*.py[cod]
 .vscode/
 .idea/
 .env
 .env.*
 !.env.example
+.vite/
+dist/
+
+.vercel
+.env*

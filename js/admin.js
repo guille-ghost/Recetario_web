@@ -47,15 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {  const loginScreen = docum
   const tabPanels = {
     recetas: document.getElementById("tab-recetas"),
     catalogo: document.getElementById("tab-catalogo"),
-    bar: document.getElementById("tab-bar"),
-    importaciones: document.getElementById("tab-importaciones")
+    bar: document.getElementById("tab-bar")
   };
 
   tabBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
       tabBtns.forEach((b) => b.classList.toggle("tab-activo", b === btn));
       Object.entries(tabPanels).forEach(([key, panel]) => {
-        panel.classList.toggle("hidden", key !== btn.dataset.tab);
+        if (panel) {
+          panel.classList.toggle("hidden", key !== btn.dataset.tab);
+        }
       });
       ocultarMensaje();
     });
